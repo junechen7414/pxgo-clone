@@ -1,0 +1,259 @@
+<title>新產品 工程起跑</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&display=swap">
+<style>
+/* 版面概念：可交接的工程起跑手冊。先釐清第一個里程碑，再列來源、沿用清單、隔離措施與逐階段驗證。 */
+:root{
+  color-scheme:light;padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px);
+  --bg:#edf2f6;--surface:#ffffff;--ink:#193141;--muted:#526777;--line:#ccd8e1;--accent:#12627a;
+  --soft:#e2ebf1;--code:#e8eef3;--keep:#166445;--keep-bg:#e3f2e9;--change:#8a4b16;--change-bg:#f9ecd8;--later:#4e5792;--later-bg:#e9ebfa;
+  --heading:"IBM Plex Sans","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --body:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono","Cascadia Code",Consolas,monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--bg:#101b24;--surface:#172632;--ink:#e4edf3;--muted:#a2b4c2;--line:#324654;--accent:#8dc7db;
+  --soft:#213744;--code:#20333f;--keep:#8ad8b2;--keep-bg:#1b3b2e;--change:#edbd83;--change-bg:#3d3020;--later:#bbc1f4;--later-bg:#2b3150;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--bg:#101b24;--surface:#172632;--ink:#e4edf3;--muted:#a2b4c2;--line:#324654;--accent:#8dc7db;
+  --soft:#213744;--code:#20333f;--keep:#8ad8b2;--keep-bg:#1b3b2e;--change:#edbd83;--change-bg:#3d3020;--later:#bbc1f4;--later-bg:#2b3150;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.85 var(--body);padding-block:0 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+[hidden]{display:none!important}.wrap{max-width:1120px;margin-inline:auto;min-width:0}
+a{color:var(--accent);text-underline-offset:3px;overflow-wrap:anywhere}:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.top{padding-block:38px 22px;display:grid;gap:16px}.eyebrow,.meta{font:500 12px/1.65 var(--mono);letter-spacing:.025em;color:var(--muted)}
+h1,h2,h3,h4{font-family:var(--heading);text-wrap:balance}h1{font-size:clamp(28px,5vw,40px);line-height:1.35;margin:0}h2{font-size:25px;line-height:1.4;margin:0}h3{font-size:19px;line-height:1.5;margin:0}h4{font-size:16px;line-height:1.6;margin:0}
+p{margin:0;max-width:78ch}.lede{font-size:17px;color:var(--muted);max-width:68ch}.scope{display:grid;gap:10px;padding:16px 18px;border:1px solid var(--line);background:var(--surface);max-width:91ch;font-size:14px}.scope strong{color:var(--accent)}
+.jump{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;display:flex;gap:4px;overflow-x:auto;background:var(--bg);padding-block:9px;border-block:1px solid var(--line);scrollbar-width:thin}.jump a{flex:none;text-decoration:none;color:var(--muted);font-size:13px;font-weight:500;padding:5px 10px;border-radius:4px}.jump a:hover{background:var(--soft);color:var(--ink)}
+section{padding-block:32px 4px;display:grid;gap:18px;scroll-margin-top:64px;min-width:0}.section-head{display:grid;gap:7px}.sub{color:var(--muted);font-size:14px;max-width:83ch}
+.paper{background:var(--surface);border:1px solid var(--line);padding:22px 24px;display:grid;gap:14px;min-width:0}.paper header{display:grid;gap:8px}.paper p,.paper li{font-size:14.5px}.paper ul,.paper ol{margin:0;padding-left:1.4em;max-width:85ch}.paper li+li{margin-top:8px}
+.notice{padding:14px 17px;background:var(--change-bg);display:grid;gap:7px;min-width:0}.notice p{font-size:14px}.badge{display:inline-flex;gap:7px;align-items:center;justify-self:start;max-width:100%;font-size:12px;font-weight:600;line-height:1.6;padding:3px 9px;border-radius:4px}.badge::before{content:"";width:7px;height:7px;flex:none;background:currentColor}.keep{background:var(--keep-bg);color:var(--keep)}.keep::before{border-radius:50%}.change{background:var(--change-bg);color:var(--change)}.later{background:var(--later-bg);color:var(--later)}.later::before{background:none;border:1.5px solid currentColor;border-radius:50%}
+code{font:.88em/1.7 var(--mono);background:var(--code);padding:2px 5px;border-radius:3px;overflow-wrap:anywhere}pre{background:var(--code);padding:14px 16px;overflow-x:auto;margin:0;font:12.5px/1.8 var(--mono);min-width:0}pre code{background:none;padding:0;font-size:inherit}
+.table-wrap{overflow-x:auto;min-width:0;max-width:100%;border:1px solid var(--line);background:var(--surface)}table{border-collapse:collapse;width:100%;min-width:700px;font-size:13.5px;line-height:1.8;font-variant-numeric:tabular-nums}th,td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}th{font-size:12px;color:var(--muted);background:var(--soft);font-weight:600}tr:last-child td{border-bottom:0}
+.source{font-size:12px;color:var(--muted);line-height:1.8;max-width:105ch;overflow-wrap:anywhere}.sequence{display:grid;gap:14px;counter-reset:steps;margin:0;padding:0!important;list-style:none;max-width:86ch}.sequence>li{counter-increment:steps;display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;margin:0!important}.sequence>li::before{content:counter(steps);font:500 14px/28px var(--mono);text-align:center;background:var(--soft);color:var(--accent);height:28px}.sequence li>div{display:grid;gap:5px;min-width:0}.end{margin-top:32px;padding-top:20px;border-top:1px solid var(--line);display:grid;gap:10px;color:var(--muted);font-size:13px}
+@media(max-width:540px){.top{padding-block:28px 18px}.paper{padding:17px 15px}h2{font-size:22px}.scope{padding:13px 14px}}@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<main class="wrap">
+<header class="top">
+  <div class="eyebrow">工程交接 · 2026-11-26 · 計畫，尚未搬移或驗證新專案</div>
+  <h1>新產品 工程起跑</h1>
+  <p class="lede">沿用已經做好的後端基礎，分階段長出新產品。第一個里程碑只要求後端能獨立建置、啟動與驗證；不用先湊齊 Playwright、監控容器或前端。</p>
+  <div class="scope">
+    <p><strong>目前已定的工程方向：</strong>既有 SpringBoot 與 Playwright 作業、上下游 CI 保留。新產品不從空白重寫技術基礎；從明確版本挑選可用檔案，必要時調整相依，不整套繼承舊業務。</p>
+    <p><strong>Playwright 僅取骨架：</strong>可參考設定、request 封裝、fixture 組合、型別生成與等待就緒的做法；不搬任何舊測試案例，也不先搬 endpoint client、測試資料配方或 SauceDemo 畫面物件。</p>
+    <p><strong>分階段：</strong>先可執行後端，再做第一段新業務；新 API 值得做黑箱驗證時才加入 Playwright。監控後端與前端各自按需要加入，不是彼此的開工門票。</p>
+    <p><strong>交付目的地已確認：</strong><code>pxgo-clone</code> 已由使用者建立，本輪只交付文件，實作由該 repo 的新 session 開始。先讀<a href="README.md">交接入口</a>確認來源與第一階段；不重問是否建立 repo，也不把這次文件交付當成搬程式、改 CI、執行 migration、commit 或 push 的授權。</p>
+    <p><strong>閱讀順序：</strong><a href="pragmatic-architecture-explanation.html">需求與理由</a> → 本頁的階段與沿用清單 → 需要追程式時看<a href="deep-module-map.html">Module 地圖</a>。三份 HTML 一起交接。</p>
+  </div>
+  <div class="meta">來源：SpringBoot 6f6218c · Playwright 7a0b744 · 本輪只讀來源／編修文件，未執行應用、測試、安裝或依賴解析</div>
+</header>
+<nav class="jump" aria-label="工程起跑章節">
+  <a href="#baseline">來源與版本</a><a href="#phases">分階段</a><a href="#layout">repo 組織</a><a href="#backend">後端沿用</a><a href="#pitfalls">搬移接線</a><a href="#playwright">Playwright 骨架</a><a href="#ci">CI 與隔離</a><a href="#verification">逐階段驗證</a><a href="#handoff">接手步驟</a>
+</nav>
+
+<section id="baseline">
+  <div class="section-head"><h2>固定來源，不重做技術選型，也不假裝已驗證</h2><p class="sub">下列版本來自本地宣告與Git HEAD，不是查詢最新版本。pxgo-clone目前已建立，但只有README與本次交付文件，尚無可執行基礎；來源相依也不因此成為新專案已通過的證據。起跑先不順便升級框架。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>來源／能力</th><th>目前可用起點</th><th>核對依據與限制</th></tr></thead>
+    <tbody>
+      <tr><td>後端來源</td><td>SpringBoot<br><code>6f6218cd7a5e87cf9a33abbf92d90e4e84b149c7</code></td><td>本輪本地 HEAD。handout 在工作目錄，尚未提交；只 clone 此 commit 不會取得這個資料夾，需另行攜帶文件或之後正式提交。</td></tr>
+      <tr><td>後端建置</td><td>Spring Boot 4.1.2、Java 25、Gradle Wrapper 9.6.1</td><td><a href="../../../SpringBoot/build.gradle">build.gradle</a>與<a href="../../../SpringBoot/gradle/wrapper/gradle-wrapper.properties">Wrapper 設定</a>。不要把仍寫 4.1.1 的概述當版本權威，也不使用機器上任意全域 Gradle。</td></tr>
+      <tr><td>資料庫與測試</td><td>Oracle、JPA、Flyway；JUnit／Mockito／MockMvc、Testcontainers Oracle</td><td>先延續目前技術以減少變因。<a href="../../../SpringBoot/src/test/java/com/ibm/demo/BaseIntegrationTest.java">BaseIntegrationTest</a>使用 JVM 單例與 <code>@ServiceConnection</code>。Oracle 與 Testcontainers 版本／image tag 以來源宣告為準，本輪未解析全部傳遞版本。</td></tr>
+      <tr><td>API 與安全基礎</td><td>WebMVC、Validation、RFC 9457、springdoc、Spring Security</td><td>框架接線可借用，舊送單契約與共用機器帳號不等於新買方／門市授權，需分開對待。</td></tr>
+      <tr><td>Playwright 來源</td><td>Playwright<br><code>7a0b744cf23408ae2e9c2d802e5a0dcfdeb0f711</code></td><td>本輪本地 HEAD，工作目錄乾淨。後續沿用檔案從此版本取，不從隨時變動的最新分支猜來源。</td></tr>
+      <tr><td>TypeScript 工具宣告</td><td>Playwright／TypeScript ESM、pnpm、Biome</td><td>來源 package.json 宣告 <code>@playwright/test ^1.57.0</code>、<code>@biomejs/biome ^2.3.8</code>，這些是範圍，不是已讀 lockfile 的精確解析版本。啟用時依挑選後的 manifest 產生並提交新 lockfile，之後用 frozen lockfile 安裝。</td></tr>
+      <tr><td>工作環境</td><td>Windows／PowerShell，本機容器用 Podman，前端與 E2E 套件用 pnpm</td><td>沿用既有環境知識，不重建 machine。Java toolchain、Testcontainers pipe／記憶體與 rootless 注意事項見<a href="../../../SpringBoot/docs/agents/02-setup.md">環境說明</a>及<a href="../../../SpringBoot/docs/agents/08-testing.md">測試規範</a>。</td></tr>
+    </tbody>
+  </table></div>
+  <p class="source">來源取得方式見<a href="README.md#來源">交接入口的來源表</a>。檔案清單以SpringBoot／Playwright各自根目錄記路徑；來源連結是同層本機checkout參考，不是pxgo-clone已存在的檔案。取得上述SHA後再選檔，勿改來源checkout或把整套舊設定當新專案指令。</p>
+</section>
+
+<section id="phases">
+  <div class="section-head"><h2>每個階段都有可交付的結果，不等全家桶到齊</h2><p class="sub">後端基礎先走，之後以新用例推動工具加入。下列是建議開發順序，不是今天已執行，也不要求把所有產品待議問題先解完。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>階段</th><th>帶入／完成什麼</th><th>明確不要求</th><th>完成判準</th></tr></thead>
+    <tbody>
+      <tr><td><strong>準備：來源與隔離</strong></td><td>確認新 repo，攜帶 handout，記兩來源 SHA。選定後端檔案、命名、獨立 DB／port 與最小 CI 範圍。</td><td>不修改舊兩 repo／CI，不複製秘密，不觸發舊下游，也不先建立空前端或 E2E 工程。</td><td>新來源與舊作業不混淆；後續每份來源檔能追到版本，沒有待自動執行的舊發布 workflow。</td></tr>
+      <tr><td><strong>第一階段：可執行後端</strong></td><td>Gradle／Boot 基礎、例外與安全接線、JPA／Flyway、隔離 Oracle；必要的基礎測試。最小 CI 只建置與驗後端。</td><td><b>不用安裝 Playwright 或瀏覽器，不用 Alloy／Prometheus／Tempo／Grafana，不用前端。</b>後端映像發布也不是必要。</td><td>Wrapper 能建置，後端能接自己的 Oracle 並通過 migration／validate，health 可用；有實際通過的基礎測試，不是只有空測試目錄。</td></tr>
+      <tr><td><strong>第二階段：第一段新業務</strong></td><td>只補這個用例依賴的契約。以送單核價／原始要求／帳面保留／同次去重為第一個有意義切片；後續再加入人工待辦與供應確認。</td><td>不必先有 UI、Playwright、推播或監控後端。不為過關恢復舊買方改單／取消。</td><td>後端規則、HTTP 契約與真 DB 測試能證明這段新行為；先前的待議事項只在相關步驟實作前補齊。</td></tr>
+      <tr><td><strong>第三階段：Playwright API 骨架</strong></td><td>新 API 穩定到值得跨程序驗證時，加入裁剪後的設定、request 封裝與最小 fixture，再寫新產品自己的少量 API 驗證。</td><td><b>不搬舊案例。</b>不先導入 SauceDemo、登入 setup、舊建資料流程、整套下游 CI，亦不必安裝瀏覽器跑純 request 測試。</td><td>實際打到本次版本後端；新測試與資料隔離可重複執行。只放骨架時標示尚未驗證，沒有測試不算 E2E 綠燈。</td></tr>
+      <tr><td><strong>後續按需要：監控</strong></td><td>先有 health、log 與必要 app metrics；需要看待辦、DB 等待或量容量時，再接監控後端。</td><td>不是第一階段必跑四個監控容器。不把來源的匿名 Admin 或 latest tag 當正式環境標準。</td><td>對應問題真的看得見；若保留 tracing，匯出有實證，不以 app healthy 冒充 trace 有送達。</td></tr>
+      <tr><td><strong>後續按需要：前端與 UI E2E</strong></td><td>真正開始買方或門市操作畫面時才選前端框架；Page Objects、瀏覽器與 UI 測試跟著真畫面加入。</td><td>來源 SpringBoot 沒有前端可搬；不先造空 app 或借用 SauceDemo 頁面。也不必等完整監控堆疊才開始畫面。</td><td>新產品畫面與後端流程可走通；UI 測試使用實際頁面，不把 API 測試更名為 UI E2E。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper">
+    <header><span class="badge keep">第一個里程碑的邊界</span><h3>可以只有 backend/，但不能只有「有成功開機」</h3></header>
+    <p>先把經過調整的技術基礎跑起來，是降低變因。除了 health，還要驗實際採用的錯誤格式、認證接線與資料庫遷移；這不需要舊 Account／Product／Order 案例或 Playwright。</p>
+    <p>如果第一階段完全沒有 entity，不要把空的 validate 稱成新模型已驗證。至少先驗新專案自己的 DB 連線與遷移基礎；第一個持久化用例加入後，再驗它的 entity／schema 與交易。</p>
+  </article>
+</section>
+
+<section id="layout">
+  <div class="section-head"><h2>先保留擴充位置，不為空目錄安裝工具</h2><p class="sub">pxgo-clone已建立。以下是實作session可採用的簡單組織，這次只交文件；後端先放子目錄，日後加入E2E與前端，不必搬動整個Gradle工程。</p></div>
+  <article class="paper">
+    <pre><code>pxgo-clone/
+  README.md
+  docs/
+    new-requirements-handout/   這三份 HTML
+    ...                        新產品自己的決策與啟動說明
+  backend/                     第一階段建立
+    gradlew / gradlew.bat
+    gradle/wrapper/
+    build.gradle / settings.gradle
+    src/
+  .github/workflows/           第一階段只放新後端驗證
+
+  # 以下等需要時才加入，不必現在建立空工程：
+  # e2e/                       Playwright 骨架＋新產品案例
+  # frontend/                  新產品真正的前端
+  # infra/                     需要時才整理額外部署／監控檔</code></pre>
+    <p>根目錄不必現在有 package.json、pnpm workspace 或大型 monorepo 工具。E2E 啟用時可先是自己的 pnpm 工程；前端進來後若真的需要共同管理套件，再選 workspace。</p>
+    <p>後端、前端與 E2E 同 repo，表示同一個 commit 能描述彼此版本，不代表三者必須同程序、同映像或每次一起部署。README 只列當前存在、確實能執行的指令。</p>
+  </article>
+</section>
+
+<section id="backend">
+  <div class="section-head"><h2>後端帶走什麼：以能一起編譯的檔案群為單位</h2><p class="sub">來源路徑均相對 SpringBoot repo 根目錄。第一階段不先升級套件，也不照搬全部 domain；但保留被選中能力所需的類別、設定與基礎測試，不只複製看起來短的 helper。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>來源檔案／範圍</th><th>新專案處理</th><th>階段與不可漏的相依</th></tr></thead>
+    <tbody>
+      <tr><td><a href="../../../SpringBoot/build.gradle">build.gradle</a>、<a href="../../../SpringBoot/settings.gradle">settings.gradle</a>、<code>gradlew</code>／<code>gradlew.bat</code>、<code>gradle/wrapper/*</code></td><td>作 backend/ 建置起點，包含 wrapper jar；調整專案名稱、group、啟動 package 與必要 plugins。</td><td>第一階段。Java 25／Boot 4.1.2／Wrapper 9.6.1 先不換；新增子目錄後 CI working directory、Docker context 與 OpenAPI 路徑都要隨之調整。</td></tr>
+      <tr><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/DemoApplication.java">DemoApplication</a>、<a href="../../../SpringBoot/src/main/resources/application.yml">application.yml</a>、<a href="../../../SpringBoot/src/main/resources/application-dev.yml">application-dev.yml</a></td><td>沿用啟動與 profile 思路；改應用名稱／package／logger 與獨立 datasource，裁掉舊 loopback、舊 domain 韌性 instance 與外部匯出預設。</td><td>第一階段。改 package 不只搜尋 Java import，也看掃描、例外型別字串與設定前綴。OSIV 維持 false，讀取在交易內轉成適合的回應。</td></tr>
+      <tr><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/GlobalExceptionHandler.java">GlobalExceptionHandler</a>、<code>exception/</code></td><td>沿用 ProblemDetail、驗證、遮蔽與集中 log。調整 ErrorCode，只保留通用或新需求需要的值；不要把舊業務拒絕原樣當新契約。</td><td>第一階段。handler 引用 Resilience4j 與 DependencyUnavailableException；若先保留 handler，就保留可編譯的相依。若裁掉分支，連測試一起調整；不先刪依賴讓骨架不能編譯。</td></tr>
+      <tr><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/config/SecurityConfig.java">SecurityConfig</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/config/properties/AppProperties.java">AppProperties</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/config/OpenApiConfig.java">OpenApiConfig</a></td><td>借用 filter／MVC 錯誤接線與機器認證起點。改成新專案自己的 env 與文件描述，不能直接把 API／INTERNAL 當買方／門市角色。</td><td>第一階段可只供本機或受控 API 開發。AppProperties 的 baseUrl／兩組機器帳號目前有驗證約束，裁欄位時同步設定與使用處。未有新授權前，不公開人員作業；後續前端登入需重看 CSRF／session 等安全選擇。</td></tr>
+      <tr><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/config/AuditTimeConfig.java">AuditTimeConfig</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/util/AuditMetadata.java">AuditMetadata</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/util/DBAssertion.java">DBAssertion</a></td><td>沿用 Clock、auditing 與必要 DB 更新檢查；在實際有需要的 entity／writer 中接好。</td><td>第一階段至首個用例。listener、embedded 初始化、bulk update 的時間／版本要一起驗；0 列不一律是錯誤，冪等與競爭依新操作判定。</td></tr>
+      <tr><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/util/PageResponse.java">PageResponse</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/util/CreatedResponse.java">CreatedResponse</a></td><td>符合新端點時沿用，不為每個回應再造信封。</td><td>建立／查詢用例需要時。送單有受理與供應進度，不能被 CreatedResponse 只有 id 限制；也不用為尚無列表先製造端點。</td></tr>
+      <tr><td><a href="../../../SpringBoot/src/test/java/com/ibm/demo/BaseIntegrationTest.java">BaseIntegrationTest</a>、<a href="../../../SpringBoot/src/test/resources/application-integration-test.yml">integration-test profile</a></td><td>沿用 Oracle JVM 單例、ServiceConnection、Flyway＋validate 與受控 Clock 的做法，改 package 後驗新專案 context。</td><td>第一階段保留真 DB 驗證能力。不要改回每個測試類別各關容器；也不要直接複製所有舊 domain integration test，再靠排除讓測試過。</td></tr>
+      <tr><td><a href="../../../SpringBoot/src/test/java/com/ibm/demo/contract/ContractTestApplication.java">ContractTestApplication</a>、<a href="../../../SpringBoot/src/test/java/com/ibm/demo/contract/ApiErrorContractTest.java">ApiErrorContractTest</a>、<code>GlobalExceptionHandlerTest</code>／通用測試</td><td>選取仍適用的基礎斷言與最小探針，配合新 package／ErrorCode／Security 修改。這是後端基礎測試，不是移植舊 Playwright 案例。</td><td>第一階段。原 <code>ApiSuccessContractTest</code>匯入舊 domain controllers，不原樣複製；新用例增加時補自己的 HTTP 成功契約。</td></tr>
+      <tr><td><a href="../../../SpringBoot/src/main/resources/db/migration/V1__initial_schema.sql">舊 V1</a>～<a href="../../../SpringBoot/src/main/resources/db/migration/V3__drop_redundant_status_columns.sql">V3</a>、<code>account/</code>／<code>product/</code>／<code>order/</code>／<code>orchestration/</code>／<code>testdata/</code></td><td>留在來源作參考，不自動納入新產品第一個可執行基準。按新用例選取可用邏輯，再建自己的資料模型／遷移。</td><td>舊業務不會因新 repo 自動相容。新且確認空白的 DB 可有自己的起始 migration；若真的要導入舊資料，另設匯入與版本方案，絕不修改來源已套用的 migration 或接舊 schema 重跑。</td></tr>
+      <tr><td><code>*Client</code>、<code>RestClientConfig</code>、<code>RestClientErrorHandler</code>、<code>HttpClientProperties</code></td><td>來源保留教學價值；新單程序基準不先帶自呼叫與補償。將來真的有遠端需求再取用。</td><td>不要讓仍啟用的 <code>@ImportHttpServices</code>引用沒帶的 interface；先處理掃描與 bean 相依，再宣稱移植完成。</td></tr>
+      <tr><td><code>SoftDeleteMetadata</code>／<code>SoftDeleteRepository</code>、舊詞彙／ADR</td><td>當作既有經驗，按新流程決定是否用；不把所有資料生命週期都硬套成不可見的刪除。</td><td>新待辦與歷史供應結果需要可查，未決狀態不要由舊 filter 代答。沿用規則時只記入新專案的相應指引，不整份複製舊 AGENTS／ADR 當新指令。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper">
+    <header><span class="badge keep">依賴也分先後</span><h3>先保存可編譯的基礎，再按採用能力裁剪</h3></header>
+    <p>WebMVC／Validation／Security／JPA／Flyway／Oracle／Actuator 與對應測試 starters 是後端起跑的主要來源。Lombok 等編譯工具跟來源程式一起保留；RestClient／HTTP pool、文件生成 plugin 與完整觀測相依，依本次有無使用決定，不必第一天整理成最小依賴集合。</p>
+    <p>允許暫時保留無外呼的 library 以免拆斷相依，但不表示要啟動相應容器。每次刪依賴先確認 import、auto-configuration、設定與測試，再重新建置；不要同時升級框架、改 DB、改 package 又重寫全部業務。</p>
+  </article>
+</section>
+
+<section id="pitfalls">
+  <div class="section-head"><h2>最容易在沿用時漏掉的接線</h2><p class="sub">這些是讀來源可確認的限制，不是本輪已在新專案修好的問題；第一階段實作時須逐項處理。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>位置／風險</th><th>起跑時的處理</th></tr></thead>
+    <tbody>
+      <tr><td>原 <a href="../../../SpringBoot/docker-compose.yml">docker-compose.yml</a>把 app 與監控綁一起</td><td>app 的 depends_on 含 alloy、ALLOY_HOST 指向它，還有固定 container_name／port。第一階段優先新建只有隔離 Oracle 的最小 Compose，後端從 IDE／bootRun 執行；若要容器 app，另外移除新專案對監控的啟動依賴，不整份照抄。</td></tr>
+      <tr><td>不跑監控，不等於自動不匯出</td><td>來源 dev profile 有 tracing endpoint，預設 OTLP_TRACING_ENABLED=true。第一階段的新本地設定關閉 tracing 匯出或不設 endpoint；OTLP metrics 維持 false，保留 health／log／需要的本機 metrics 即可。不能光關容器卻讓 app 一直報連線失敗。</td></tr>
+      <tr><td>來源 init script 會印出生成的 SQL</td><td><a href="../../../SpringBoot/init-scripts/01_setup.sh">01_setup.sh</a>將帳密代入 SQL 後輸出檔案內容；<a href="../../../SpringBoot/init-scripts-template/01_setup.sql.tmpl">template</a>也帶寬鬆的 ANY TABLE 權限。新專案不要原樣採用；改用不記錄秘密、僅限新 schema 的初始化方式，再單獨驗證。</td></tr>
+      <tr><td>.env 與 bootRun／IDE 是兩條路</td><td>Compose 讀 .env 不代表 Spring Boot 或 IDE 會自動載入它。新 README 說明 env 如何進到後端程序；只提交 .env.example 占位值。不得把來源 .env、secret、個人本機工具設定或認證快取放進新 repo。</td></tr>
+      <tr><td>DB、volume、host port 與容器名稱</td><td>新舊專案資料與容器資源分開；移除固定名稱或用新名稱、新 volume。若同時跑，主機 1521／8787 等 port 不能撞。新 datasource 與測試只能指到新資源，不共用舊作業帳密或 Flyway history。</td></tr>
+      <tr><td>已發布的舊 app 與新 E2E 可能版本不符</td><td>同 repo 的驗證要啟動這次 commit 的後端，不直接拉舊 SpringBoot image／latest。E2E 日後啟用時將 base URL、spec、資料來源都對準本次版本。</td></tr>
+      <tr><td>映像建置與 HEALTHCHECK</td><td><a href="../../../SpringBoot/Dockerfile">來源 Dockerfile</a>可在需要容器 app 時借用；backend/ context、port、profile 與探針一起改。新 app 的 health 應反映 DB 就緒；本機 Podman 發布含 HEALTHCHECK 的映像要注意 Docker 格式。舊映像的探針契約不因新案而修改。</td></tr>
+      <tr><td>OpenAPI 型別與文件生成</td><td>有穩定 API 才加入生成流程；從這次啟動的 app 取 spec，不能抓殘留 8787 舊 app 或用舊 Swagger 快照。H2 文件 profile 不是 Oracle 交易驗證，不拿文件生成成功代表業務測試通過。</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="playwright">
+  <div class="section-head"><h2>Playwright 只拿骨架，所有舊案例留在原 repo</h2><p class="sub">這份是稍後啟用時的選取清單，不要求第一階段複製檔案或安裝套件。骨架也有舊契約，不能以「不是 spec 檔」就整份認定可共用。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>來源 Playwright 檔案</th><th>值得帶走的部分</th><th>帶入前必須調整</th></tr></thead>
+    <tbody>
+      <tr><td><code>package.json</code></td><td>ESM、pnpm、一般檢查／測試指令的組織。</td><td>改專案名，只加有使用的依賴；不帶舊測試路徑、compose-restart、spec 同步與 CI 串接 scripts。舊 clean 是 Windows CMD 語法，不當跨平台方案；選定新 manifest 後產生自己的 lockfile。</td></tr>
+      <tr><td><code>playwright.config.ts</code></td><td>timeout、reporter、失敗證據與 CI／本機輸出安排。</td><td>移除 ui-setup／ui-staging／springboot-api 的舊 testMatch、dependencies、外站 URL 與預設 Basic header。只定義新專案已存在的 project；重定義 base URL、平行數與 retries，不用重試掩蓋失敗。</td></tr>
+      <tr><td><code>tsconfig.json</code>、<code>biome.json</code></td><td>型別檢查、可讀 import、格式與 noFloatingPromises 等規則。</td><td>依 e2e/ 新位置改 aliases／include，刪不存在的 pages／components 與舊 global setup；對齊 Node runtime、TypeScript preset、Node types 與 Biome schema。先選同一套，不混用來源不同 Node 主版本的宣告。</td></tr>
+      <tr><td><code>services/apis/base-api-client.ts</code></td><td><code>ApiRequester</code>組合 request context、<code>ApiResult&lt;T&gt;</code>與狀態／錯誤斷言思路；它沒有依賴舊 generated schema。</td><td>其中 CreatedResponse、正整數 id／Location、錯誤 code／detail／errors 與純文字自動轉數字，仍是契約假設，依新 API 留用。TypeScript 的 <code>as T</code>不是 runtime 驗證。</td></tr>
+      <tr><td><code>services/config/env.ts</code></td><td>集中讀設定與驗證的入口。</td><td>來源 env.ts 的 API_BASE_URL／8080 與 config 的 BASE_URL／8787 不一致，新案統一一個來源；不能假設這兩檔會自動讀 .env，缺必要值應明確失敗。</td></tr>
+      <tr><td><code>services/schema/common-types.ts</code></td><td>手寫共用型別與生成型別分開的方式。</td><td>分頁欄位與零起算等仍是新契約選擇；相符才留，不把舊型別當產品需求。</td></tr>
+      <tr><td><code>services/fixtures/*</code>的設計方式</td><td><code>test.extend</code>、request 注入、<code>await use</code>與需要時才用 mergeTests。</td><td><b>只取組合方式，不搬舊檔。</b>來源 API fixture 混有端點 client、Faker、Account／Product／Order 建資料流程。等新用例需要資料，再寫新的小 fixture，不預先生一層空框架。</td></tr>
+      <tr><td><code>scripts/wait-for-app.mjs</code></td><td>輪詢、單次 timeout、總期限與失敗 exit code。</td><td>改新 port／health 路徑與就緒判準，移除舊容器診斷提示。等新後端實際需要自動啟動／等待時採用，不是先起一堆容器。</td></tr>
+      <tr><td>OpenAPI 產生 TypeScript 的做法</td><td>新 API 穩定後由本次 app spec 生成，不手改 generated types。</td><td>不搬來源 docs/swagger.json、swagger.live.json 或 services/schema/api-types.ts；也不靠另一個 repo 推送快照，型別要對應本次受測版本。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper">
+    <header><span class="badge change">明確排除</span><h3>「案例不搬」包括案例依賴的資料與畫面層</h3></header>
+    <ul>
+      <li><b>所有舊 tests/**：</b>API、UI、setup、auth.setup、契約探針與其他案例，都不搬；不把其中幾支改名當新產品 smoke test。</li>
+      <li><b>舊專用流程：</b>SpringBoot endpoint client、Account／Product／Order 測試資料 fixture、SauceDemo pages／components／fixtures，以及登入 storageState。</li>
+      <li><b>舊輸出與環境：</b>Swagger／generated schema、.env、憑證、reports、test-results、node_modules、瀏覽器快取與個人工具設定。</li>
+      <li><b>舊執行鏈：</b>repository-dispatch、固定拉舊 GHCR image／latest、跨 repo 更新 spec，以及會 down -v 的重置腳本。新測試資料隔離須另定，只能動新案專用測試資源。</li>
+    </ul>
+    <p>純 Playwright request 測試不需要先下載瀏覽器。只有真正加入前端 UI 測試時，才安裝所選瀏覽器、加入對應 CI 與新 Page Objects。沒案例時不要用 pass-with-no-tests 類選項製造完成訊號。</p>
+  </article>
+</section>
+
+<section id="ci">
+  <div class="section-head"><h2>新 CI 從後端驗證起跑，不繼承舊發布副作用</h2><p class="sub">原上下游流程完整保留。這裡只規劃新 repo 的起點，沒有修改任何 workflow、secrets、variables、image 或下游設定。</p></div>
+  <article class="paper">
+    <header><span class="badge keep">最初只需要一條後端驗證</span><h3>取得程式 → JDK／Wrapper → 真正的後端測試與建置</h3></header>
+    <p>新 workflow 明確在 backend/ 執行 Gradle，使用新專案已選 JDK 與 wrapper／cache 路徑；若測試會啟 Oracle，配置相應資源與可用的 container runtime。第一階段不需要 GHCR 推送、repository-dispatch、前端建置、Playwright 或監控服務。</p>
+    <p>Playwright 日後加入時，從同一次 checkout 建置／啟動後端，等待 DB／app 就緒，再對它跑新 API 測試。不是讀 package 裡有 test script 就宣稱已接 E2E；CI summary 要說清楚這次到底驗了什麼。</p>
+  </article>
+  <div class="notice">
+    <p><b>不能直接複製成啟用狀態：</b><a href="../../../SpringBoot/.github/workflows/image-publish.yml">舊 image-publish.yml</a>會推 image、使用 DEST_USER／DEST_REPO 與 MY_REPO_TOKEN 觸發下游，另一個 job 還會提交 Swagger 到目的 repo。即使 image 名稱部分由 github.repository 推導，也不代表其餘目的地安全。</p>
+    <p>新 repo 第一次 push 前就要移除或停用這些舊副作用；等真的需要發布時才為新 repo 設自己的目的地與權限。不要複製整個 .github 後靠「先不按 Run」來避免自動觸發。</p>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>必須隔離／重設</th><th>起跑規則</th></tr></thead>
+    <tbody>
+      <tr><td>Git 與來源紀錄</td><td>新 repo 的 remote、commit history 採用方式與名稱另外確認；不要把舊 .git 目錄直接複製覆蓋新 repo。用檔案清單與來源 SHA 記沿用，保留適用的授權／歸屬。</td></tr>
+      <tr><td>秘密與本機產物</td><td>不複製 .env、key、token、個人 settings、.gradle、build/、node_modules、報告或認證狀態。若以快照取檔，採已選檔案白名單，不是把工作目錄整包壓縮。</td></tr>
+      <tr><td>新 .gitignore／容器 build context</td><td>忽略 backend/build、Gradle、後續的 E2E／前端產物與 secrets；不要把 <code>gradle/</code>、wrapper jar、handout 或新 lockfile 一起忽略。容器階段再補適當 .dockerignore，避免 secrets 進 build context。</td></tr>
+      <tr><td>資料與測試重置</td><td>新 DB／schema、volume 與帳密獨立，dev 資料不當 E2E 可丟棄庫。以後要重置只能對測試專用資源操作；此頁不提供也不授權執行清庫命令。</td></tr>
+      <tr><td>來源專案不受影響</td><td>不修改兩個舊 repo 的 CI／變數／secrets，不借用舊下游當新案測試入口，不把新需求的驗收寫回舊案例。</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="verification">
+  <div class="section-head"><h2>交付哪一階段，就出示那一階段的證據</h2><p class="sub">以下都是未來在新專案執行的驗證，不是本輪通過紀錄。不為文件完整就先把所有工具裝齊。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>階段／能力</th><th>接手後要實際驗證</th><th>不能拿來替代</th></tr></thead>
+    <tbody>
+      <tr><td>後端第一階段</td><td>backend/ 以 wrapper 編譯／打包；可重複的基礎單元／HTTP 契約測試。Oracle 連線與新 migration／validate 有真正執行證據，health 對應的是新 DB。</td><td>只有 bootJar、只有空測試 task、只有 health UP，或連到舊 app 的成功回應。</td></tr>
+      <tr><td>第一段新業務</td><td>用例測試、實際序列化、DB 約束與必要的交錯／提交測試；新資料保存與重試行為符合已選規則。</td><td>移植舊案例後改預期值，或 H2 文件生成當 Oracle 交易證明。</td></tr>
+      <tr><td>Playwright 骨架</td><td>選定 manifest／lockfile、型別與格式檢查；需要時先對本次後端寫一支真正的新 API 驗證。</td><td>安裝成功、沒有測試檔，或純 request 測試通過就稱完整 UI E2E。</td></tr>
+      <tr><td>待辦／人工流程</td><td>受理與回報各有短交易，重啟仍可見、重複回報不多解除；門市授權／回架等先補相關契約再驗。</td><td>以單一長交易 rollback 假裝重啟恢復，或 DB rollback 假裝實體貨已回架。</td></tr>
+      <tr><td>監控／前端</td><td>有需求才加，分別驗真訊號與真畫面。需要量容量前補對應觀測，不能因延後而永久不量。</td><td>搬一份 dashboard 就稱已接通，或來源沒有的前端被寫成可沿用成果。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper">
+    <header><span class="badge later">未來指令範例，不是現在執行</span><h3>命令留在能執行的階段</h3></header>
+    <p>以下在新 repo 的 backend/ 內，以 PowerShell 執行。套件、檔案與測試就位後再跑；本輪只記錄，不啟動容器或 Gradle。</p>
+    <pre><code># 第一步先驗編譯／打包；不把它當測試通過
+./gradlew bootJar
+
+# 測試已就位後；可能啟動 Testcontainers Oracle
+./gradlew test "-Djunit.platform.exclude.tags=SanityTest"
+
+# 新 dev datasource 與 env 已設定、隔離 DB 就緒後
+./gradlew bootRun</code></pre>
+    <p>來源 gate 指令名字雖說 Unit，實際 test task 可能含 Oracle 整合測試，不能當成永遠不碰容器的快速檢查。第一階段測試集合以新專案實際保留內容為準。</p>
+    <p>本機跑 Oracle 前先參考資源與 pipe 說明，不為了測試新專案擅自停止舊環境或改全域設定。Playwright、前端指令等真正建立相應工程後再寫進新 README。</p>
+  </article>
+</section>
+
+<section id="handoff">
+  <div class="section-head"><h2>交給下一個 session：先交第一階段，不先造整個產品</h2><p class="sub">pxgo-clone已建立且文件已交付；使用者會在該repo另開session開始實作。本頁補工程起點，不取代產品需求。來源或權限不足時說明缺少什麼，不憑文件假造程式，也不把本次交文件當作已實作。</p></div>
+  <article class="paper">
+    <ol class="sequence">
+      <li><div><h4>讀完三份的相關部分</h4><p><a href="pragmatic-architecture-explanation.html#requirements">需求</a>決定產品行為，<a href="#phases">本頁階段</a>決定先交什麼；<a href="deep-module-map.html">地圖</a>只在追來源時讀。已定規則不重問，也不要把地圖的全部候選當第一階段工作。</p></div></li>
+      <li><div><h4>核對來源與第一階段執行細節</h4><p>目的地已是pxgo-clone，不重問是否建repo。以兩個SHA選檔，來源若已變先記差異；新session確認package、隔離DB／port與最小CI後實作。不要把來源規範自動升成新案規範，或把舊發布流程帶進新repo。</p></div></li>
+      <li><div><h4>只交付可執行後端基礎</h4><p>沿用 Wrapper、Boot、例外／安全／資料存取與基礎測試，補齊相依和新設定。不要建 frontend/ 空 app，不加入舊 Playwright 案例，也不要求完整監控容器。</p></div></li>
+      <li><div><h4>記錄實際驗證，再選第一個用例</h4><p>列執行命令、通過／失敗／未跑，不把來源歷史測試當新證據。完成後才選下一個新業務切片與必要決策；完整 E2E、監控後端、UI 各自依需求排入。</p></div></li>
+    </ol>
+  </article>
+  <div class="notice"><p><b>不可誤解為：</b>從空白重造技術棧、把舊作業直接改成新產品、搬整套 Playwright 案例、為了完整性先起監控與前端，或以本文件授權 push／發布。沿用的是可工作的基礎與經驗，產品流程仍由新需求決定。</p></div>
+</section>
+<footer class="end">
+  <p><b>本輪完成：</b>三份HTML與交接入口交付到使用者已建立的pxgo-clone，並修正來源連結；實作在該repo的新session開始。只核對來源與文件，未搬程式、改應用／schema／CI、安裝、啟動應用或執行應用測試、壓測；未commit／push。</p>
+  <p><b>保存與交接：</b>三份 HTML 在 docs/new-requirements-handout/，不受 Gradle clean 影響。文件可以整份攜帶；引用的來源程式、舊指引與 Playwright 骨架不在此資料夾內，需依記錄的 repo／SHA 另外取得。來源兩個 repo 的正式規範不因這份草案被覆寫。</p>
+  <p><b>閱讀：</b>無 JavaScript、無瀏覽器儲存；Google 字型不可用時用系統字型。本輪只產生本地交接檔案，未發布線上 Artifact。</p>
+</footer>
+</main>

@@ -1,0 +1,404 @@
+<title>訂購系統 務實架構</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600;700&display=swap">
+<style>
+/* 版面概念：需求決策手冊。先列承諾，再追知識如何變動，最後才畫 module、交易與部署。 */
+:root{
+  color-scheme:light;padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px);
+  --bg:#edf2f6;--surface:#ffffff;--ink:#193141;--muted:#526777;--line:#ccd8e1;--accent:#12627a;
+  --soft:#e2ebf1;--code:#e8eef3;--keep:#166445;--keep-bg:#e3f2e9;--change:#8a4b16;--change-bg:#f9ecd8;--later:#4e5792;--later-bg:#e9ebfa;
+  --heading:"IBM Plex Sans","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --body:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono","Cascadia Code",Consolas,monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--bg:#101b24;--surface:#172632;--ink:#e4edf3;--muted:#a2b4c2;--line:#324654;--accent:#8dc7db;
+  --soft:#213744;--code:#20333f;--keep:#8ad8b2;--keep-bg:#1b3b2e;--change:#edbd83;--change-bg:#3d3020;--later:#bbc1f4;--later-bg:#2b3150;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--bg:#101b24;--surface:#172632;--ink:#e4edf3;--muted:#a2b4c2;--line:#324654;--accent:#8dc7db;
+  --soft:#213744;--code:#20333f;--keep:#8ad8b2;--keep-bg:#1b3b2e;--change:#edbd83;--change-bg:#3d3020;--later:#bbc1f4;--later-bg:#2b3150;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.85 var(--body);padding-block:0 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+[hidden]{display:none!important}
+.wrap{max-width:1120px;margin-inline:auto;min-width:0}
+a{color:var(--accent);text-underline-offset:3px;overflow-wrap:anywhere}
+:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.top{padding-block:38px 22px;display:grid;gap:16px}
+.eyebrow,.meta{font:500 12px/1.6 var(--mono);letter-spacing:.04em;color:var(--muted)}
+h1,h2,h3,h4{font-family:var(--heading);text-wrap:balance}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.35;letter-spacing:-.015em;margin:0}
+h2{font-size:25px;line-height:1.4;margin:0}h3{font-size:19px;line-height:1.5;margin:0}h4{font-size:16px;line-height:1.6;margin:0}
+p{margin:0;max-width:76ch}.lede{font-size:17px;color:var(--muted);max-width:66ch}
+.scope{display:grid;gap:9px;padding:15px 18px;border:1px solid var(--line);background:var(--surface);max-width:90ch;font-size:14px}.scope strong{color:var(--accent)}
+.jump{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;display:flex;gap:4px;overflow-x:auto;background:var(--bg);padding-block:9px;border-block:1px solid var(--line);scrollbar-width:thin}
+.jump a{flex:none;text-decoration:none;color:var(--muted);font-size:13px;font-weight:500;padding:5px 10px;border-radius:4px}.jump a:hover{background:var(--soft);color:var(--ink)}
+section{padding-block:32px 4px;display:grid;gap:18px;scroll-margin-top:64px;min-width:0}.section-head{display:grid;gap:7px}.sub{color:var(--muted);font-size:14px;max-width:82ch}
+.paper{background:var(--surface);border:1px solid var(--line);padding:22px 24px;display:grid;gap:14px;min-width:0}.paper header{display:grid;gap:8px}.paper p,.paper li{font-size:14.5px}.paper ul,.paper ol{margin:0;padding-left:1.4em;max-width:83ch}.paper li+li{margin-top:7px}
+.notice{padding:14px 17px;background:var(--change-bg);display:grid;gap:7px;min-width:0}.notice p{font-size:14px}
+.badge{display:inline-flex;gap:7px;align-items:center;justify-self:start;max-width:100%;font-size:12px;font-weight:600;line-height:1.6;padding:3px 9px;border-radius:4px}.badge::before{content:"";width:7px;height:7px;flex:none;background:currentColor}.keep{background:var(--keep-bg);color:var(--keep)}.keep::before{border-radius:50%}.change{background:var(--change-bg);color:var(--change)}.later{background:var(--later-bg);color:var(--later)}.later::before{background:none;border:1.5px solid currentColor;border-radius:50%}
+code{font:.88em/1.7 var(--mono);background:var(--code);padding:2px 5px;border-radius:3px;overflow-wrap:anywhere}pre{background:var(--code);padding:14px 16px;overflow-x:auto;margin:0;font:12.5px/1.8 var(--mono);min-width:0}pre code{background:none;padding:0;font-size:inherit}
+.table-wrap{overflow-x:auto;min-width:0;max-width:100%;border:1px solid var(--line);background:var(--surface)}table{border-collapse:collapse;width:100%;min-width:700px;font-size:13.5px;line-height:1.8;font-variant-numeric:tabular-nums}caption{text-align:left;padding:12px 14px;font-weight:600;color:var(--muted)}th,td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}th{font-size:12px;color:var(--muted);background:var(--soft);font-weight:600}tr:last-child td{border-bottom:0}
+.source{font-size:12px;color:var(--muted);line-height:1.8;max-width:100ch;overflow-wrap:anywhere}.two-up{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;min-width:0}
+figure{margin:0;min-width:0;display:grid;gap:10px;align-content:start}.figure-head{display:grid;gap:6px}.diagram-scroll{overflow-x:auto;min-width:0;background:var(--surface);border:1px solid var(--line);padding:10px}svg.arch{display:block;width:100%;min-width:400px;max-width:100%;height:auto;color:var(--ink)}svg .box{fill:var(--surface);stroke:var(--line);stroke-width:1.4}svg .focus{fill:var(--keep-bg);stroke:var(--keep);stroke-width:1.6}svg .cross{fill:var(--change-bg);stroke:var(--change);stroke-width:1.4}svg .tx{fill:var(--keep-bg);stroke:var(--keep);stroke-width:1.4;stroke-dasharray:5 4}svg .arrow{fill:none;stroke:currentColor;stroke-width:1.4}svg .network{stroke:var(--change);stroke-dasharray:5 3}svg .arrowhead{fill:currentColor}svg .label{font:500 13px var(--heading);fill:currentColor}svg .small{font:12px var(--body);fill:var(--muted)}svg .txlabel{font:600 13px var(--heading);fill:var(--keep)}svg .warnlabel{font:600 12px var(--heading);fill:var(--change)}figcaption{font-size:13px;line-height:1.8;color:var(--muted);max-width:70ch}
+.sequence{display:grid;gap:12px;counter-reset:steps;margin:0;padding:0!important;list-style:none;max-width:86ch}.sequence>li{counter-increment:steps;display:grid;grid-template-columns:28px minmax(0,1fr);gap:12px;margin:0!important}.sequence>li::before{content:counter(steps);font:500 14px/28px var(--mono);text-align:center;background:var(--soft);color:var(--accent);height:28px}.sequence li>div{display:grid;gap:5px;min-width:0}
+.note-grid{display:grid;grid-template-columns:180px minmax(0,1fr);gap:11px 20px;margin:0}.note-grid dt{font-weight:600}.note-grid dd{margin:0;color:var(--muted);max-width:76ch}.end{margin-top:32px;padding-top:20px;border-top:1px solid var(--line);display:grid;gap:10px;color:var(--muted);font-size:13px}
+@media(max-width:820px){.two-up{grid-template-columns:minmax(0,1fr)}svg.arch{max-width:540px;margin-inline:auto}}
+@media(max-width:540px){.top{padding-block:28px 18px}.paper{padding:17px 15px}h2{font-size:22px}.note-grid{grid-template-columns:minmax(0,1fr);gap:4px}.note-grid dd+dt{margin-top:10px}.scope{padding:13px 14px}}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<main class="wrap">
+<header class="top">
+  <div class="eyebrow">新產品需求草案 · 2026-11-26 · 既有作業保留</div>
+  <h1>訂購系統 務實架構</h1>
+  <p class="lede">送單確認價格，揀貨確認供應。先保留帳面庫存，再由門市實際備貨；買方收到送單成功，不代表所有商品都保證買得到。</p>
+  <div class="scope">
+    <p><strong>既有作業保留：</strong>目前 SpringBoot 與獨立 Playwright repo 是完整作業的延伸，實作、loopback 呼叫與上下游 CI 都有學習價值，維持原定位。新需求不等於要重寫這套作業，也不安排淘汰既有 CI。</p>
+    <p><strong>新產品方向：</strong>單一自營商家的門市購物流程。買方送出要求，系統核價並保留帳面數量，門市實際揀貨後確認供應。第一版先跑通人工處理，不做支付、配送或售後。</p>
+    <p><strong>目的地與工程階段：</strong>新專案已準備於 <code>pxgo-clone</code>，交接從<a href="README.md">文件入口</a>開始。沿用來源後端技術與測試基礎，不從空白重寫；第一階段先交付可執行後端。Playwright 只在需要時取骨架、不搬舊案例，完整 E2E、監控容器與前端都不是開工前置條件。未來前端／E2E 與後端同 repo，不代表必須同時開發或部署。</p>
+    <p><strong>設計原則：</strong>先用清楚的產品定義減少不需要的例外：同商品不足就整項不供應、不自動減量；送單成功後買方不能自行改單或取消，事前明確告知。這些是目前選擇，將來有真需求再改，不先造萬用流程框架。</p>
+    <p><strong>三份文件分工：</strong>本頁記需求與理由；<a href="project-bootstrap-plan.html">工程起跑</a>補沿用來源、階段、接線與驗證；<a href="deep-module-map.html">Module 地圖</a>保留既有程式學習分析與另案差異。先讀本頁，再看工程起跑；地圖是需要時追程式的參考，不是來源 SpringBoot 待辦。</p>
+    <p><strong>文件，不是實作授權：</strong>本輪只整理三份 HTML，不修改應用、schema、CI、CONTEXT 或 ADR，也不建立新產品 repo 或搬移應用／測試。Account、Product、Order 是既有程式分組；新產品的責任由新需求推導，本頁不取代既有 AGENTS.md。</p>
+  </div>
+  <div class="meta">需求更新：2026-11-26 · 程式核對沿用：6f6218c／2026-11-24 · Boot 4.1.2 / Java 25 / Oracle · 本輪未跑應用、容量或故障測試</div>
+</header>
+<nav class="jump" aria-label="章節導覽">
+  <a href="#requirements">已確認需求</a><a href="#open-decisions">明確待議</a><a href="#changes">知識怎麼變</a><a href="#responsibilities">責任候選</a><a href="#submission">送單與揀貨</a><a href="#architecture">交易與部署</a><a href="#concurrency">併發與資料</a><a href="#capacity">高承載驗收</a><a href="#choices">技術取捨</a><a href="#practice">練習順序</a><a href="#references">現況依據</a>
+</nav>
+
+<section id="requirements">
+  <div class="section-head"><h2>已確認：先收購買要求，再由門市確認供應</h2><p class="sub">使用者以門市即時購物 app 作為體驗參考。以下記錄本專案已選的規則，不宣稱已查證或重現任何業者的完整制度；這次包含業務改變，不只是重構。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>範圍</th><th>已確認的選擇</th><th>不代表什麼</th></tr></thead>
+    <tbody>
+      <tr><td>經營模式與範圍</td><td>單一商家、自營商品與庫存；第一版到人工揀貨、供應確認與結果查詢。</td><td>不一次加入多賣家、分潤、支付（含模擬支付）、配送、退貨、退款或替代商品。</td></tr>
+      <tr><td>送單與供應分開</td><td>送單成功代表系統已保存這次購買要求及受理結果；最終哪些商品能供應，等門市實際揀貨確認。</td><td>不是送單當下就保證備齊，也不是背景再查一次 DB 庫存來代替人工揀貨。</td></tr>
+      <tr><td>先保留帳面庫存</td><td>送單時對可售、價格核對成功且帳面足量的商品，先保留完整要求量，避免其他線上要求重複占用。</td><td>不是購物車就先 hold；也不能消除帳面與現場差異。保留成功尚不等於供應保證。</td></tr>
+      <tr><td>同商品不減量</td><td>要 5 件就必須備齊 5 件。帳面不足，該項不進待揀；現場只有 4 件，該項整項不供應，解除該項尚有效的保留。</td><td>不先保留部分等補貨，不擅自改成 4 件，不替換商品，不自動候補或補單。</td></tr>
+      <tr><td>各商品分別判斷</td><td>一項未進待揀或最後無法供應，不影響其他商品各自確認。原始要求、逐項結果與原因都保留。</td><td>不是允許 DB 寫到一半；全部未進待揀或最後全部無法供應，也不能刪掉這次購買紀錄。</td></tr>
+      <tr><td>價格與名稱</td><td>送單時由後端核對買方同意價；異價該項不進待揀，提供新價供重新決定。通過的商品保存送單當次名稱與單價，等待期間改價不影響本次。</td><td>不信任任意 client 報價，不等揀貨才決定成交單價；最後只按確認供應內容與已固定單價計算，不重新套現價。</td></tr>
+      <tr><td>買方改單與取消</td><td>送單成功後不提供買方自行修改或取消，並在送單前明確說明。</td><td>不另外建立「開始揀貨前可取消」的窗口；門市回報缺貨是供應確認，不是買方部分取消。</td></tr>
+      <tr><td>人工處理與整筆取消</td><td>第一版先提供可見的待處理要求，由門市處理或人工整筆取消、解除尚有效的保留。</td><td>不代表門市任何階段都可取消；授權、可取消時機、已拿出商品如何回架仍待定。買方沒有因此取得取消權。</td></tr>
+      <tr><td>自動到期</td><td>先跑通人工流程，第一版不做自動到期；未處理要求可能持續占住庫存，要能看見並人工處理。</td><td>這是開發順序，不是永久不設期限；HTTP timeout 不能觸發自動釋放，也不先加到期 worker。</td></tr>
+      <tr><td>商品下架</td><td>只停止新銷售；有既有要求或保留量仍可下架。舊紀錄、供應處理與解除保留不能被可售過濾隱藏。</td><td>不抹除庫存、不自動取消既有要求。舊「保留量大於零就禁止下架」不再是目標需求。</td></tr>
+      <tr><td>買方停用</td><td>保留「有 Active Order 的買方不能停用」的原則；資格檢查與送單／停用仍須協調。</td><td>新增待揀與供應確認後，哪些階段算 Active Order 要重新定義，不能直接沿用「尚未 Cancel」當完整答案。</td></tr>
+      <tr><td>同次重試</td><td>同一次送單有穩定身分，不重建、不重複保留，也不重新核價或嘗試被排除商品。原受理結果固定，目前進度則可往後更新。</td><td>不能永遠只回待揀而讓買方看不到後續結果；歷史重播與進度查詢的 HTTP 形狀仍待定。刻意再買用新身分。</td></tr>
+      <tr><td>過載與待辦</td><td>HTTP 等待與在途量有上限，未受理時明確拒絕；已受理的人工待辦必須持久化，重啟後仍可見。</td><td>人工待辦不是無限 HTTP 等待；也不因需要保存待辦就必須先上 MQ。業務待辦容量上限尚未定。</td></tr>
+      <tr><td>高承載目標</td><td>一般零售混合流量，另測有限熱門商品；分開量送單／帳面保留能力與門市供應完成速度。</td><td>不把快速收進大量待辦當成同等供應能力；沒有量測就不宣稱 TPS、p99 或門市處理量。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper" id="discussion-conclusions">
+    <header><span class="badge keep">本輪定案 · 2026-11-26</span><h3>用定義拿掉不需要的分支，但不掩蓋真實故障</h3></header>
+    <p>「以定義規避例外」在這裡的具體選擇，是不提供縮量、替代商品及買方送單後自行改單／取消。買方事前知道限制，系統就不必先建造所有可能的變更流程。仍需由後端限制操作，不能只把畫面按鈕藏起來。</p>
+    <p>現場缺貨是正常供應結果；重複操作、DB 故障、保留量錯帳與門市無法處理，仍要有正確且可見的處理方式。產品規則不能讓這些問題自動消失。</p>
+    <p>先做這個版本，之後有真需求再調整。現在不先決定所有狀態、資料表或未來流程，也不為將來可能變動先做可切換全部規則的框架。</p>
+  </article>
+  <div class="notice"><p><b>新產品草案取代的假設：</b>不再是「送單時就確定供應，所有結果一次完成」。現在是送單核價與保留、人工揀貨、後續供應確認；買方不能自行取消，門市仍有人工整筆取消。原草案「只保留最後成立商品」的資料模型與庫存公式也要重看；這些變更不回溯要求既有作業改成新產品。</p></div>
+</section>
+
+<section id="open-decisions">
+  <div class="section-head"><h2>還沒決定的部分，留到相應步驟再定</h2><p class="sub">人工揀貨、先保留、同商品不減量、送單固定價、買方不能自行取消已定案。下面才是未決事項；實作某一步前先補齊它依賴的契約，不要求一次設計完整零售系統。</p></div>
+  <article class="paper">
+    <header><span class="badge later">尚待討論</span><h3>購買要求、待揀與最後供應內容，怎麼記錄與結束？</h3></header>
+    <p>至少要分得清買方原本要求、送單受理結果、目前仍有效的保留，以及門市最後確認內容。哪些共用 Order／Order Line、Order 何時建立、狀態名稱、逐項回報或整批完成，尚未定案；本頁使用的「待揀」是業務描述，還不是已選的 enum。</p>
+    <p>供應確認後，保留繼續存在、轉為已售出或在某個完成動作結束，也還沒決定。不能因為第一版不做配送，就默認它永遠是未取消的持有量。</p>
+  </article>
+  <div class="table-wrap"><table>
+    <thead><tr><th>需要補齊的決定</th><th>目前可確定的底線</th></tr></thead>
+    <tbody>
+      <tr><td>送單身分的 caller／買方範圍、同身分異內容</td><td>同一意圖才能重播，不洩露別人的結果。建議異內容視為衝突，不重新執行；共用機器帳號還不是買方資源授權。</td></tr>
+      <tr><td>結果保存期限與過期回應</td><td>不能默默清掉去重紀錄，再把舊重試當新購買。已保存的價格與初次排除理由不因補貨、改價、揀貨或取消而被改寫。</td></tr>
+      <tr><td>受理／全未進待揀／供應結果的 HTTP 契約</td><td>分清歷史受理結果與目前進度，包含逐項原因、查詢位置、重播、Location 與技術失敗；不能被 CreatedResponse 只有 id 限制。本輪不先指定 200／201／202 等完整答案。</td></tr>
+      <tr><td>門市作業與授權</td><td>要能看待辦、回報供應及人工整筆取消；誰能操作、是否認領、可取消階段、原因與回報粒度待定。重複回報不能多還量；互相衝突的回報與取消，也不能各自當作成功。</td></tr>
+      <tr><td>帳面差異與商品回架</td><td>解除保留不等於補貨或盤點校正。缺貨怎麼修正帳、已拿出的商品何時回架與再次可售，需另定；不能只把數量加回去就宣稱現場有貨。</td></tr>
+      <tr><td>確認後生命週期與 Active Order</td><td>供應確認後如何完成、保留如何結束，以及待揀／部分供應／全未供應／門市取消各階段是否阻擋買方停用，要一起定義。</td></tr>
+      <tr><td>待辦容量與日後自動到期</td><td>第一版不做自動到期；需接受未處理就持續占量的代價。是否限制業務待辦量、未來期限與揀貨競爭，之後再決定，不默加逾時釋放。</td></tr>
+      <tr><td>新專案放置與版本管理</td><td>目的地已確認為pxgo-clone；先交文件，再於新session實作。後端先做，前端／E2E日後同repo加入；目錄細節與新CI依工程階段落實。來源兩個repo與上下游CI保留。</td></tr>
+      <tr><td>初始資料與庫存管理</td><td>先以單一庫存池分析，補貨／盤點權限待定。不預設搬舊資料，也不授權清庫；若日後選擇匯入，未知舊價不能假造，舊 reserved 需另驗。</td></tr>
+      <tr><td>數字化容量／延遲目標</td><td>先固定環境與負載建立基準；系統吞吐與人工處理速度分開，不編造比例、TPS 或延遲保證。</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="changes">
+  <div class="section-head"><h2>從「哪些知識一起改」找責任</h2><p class="sub">一起執行不等於一定屬於同一 module；跨時間也不代表一定跨服務。要找的是：改一條規則時，誰必須理解同一份知識，哪些 caller 不該被迫跟著改。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>變化</th><th>誰要理解規則</th><th>協作者只需要知道</th><th>不該被迫一起改</th></tr></thead>
+    <tbody>
+      <tr><td>商品改價／改名</td><td>商品販售管理現在名稱、權威價格與版本；接單在送單時核對並保存本次價格／名稱。</td><td>該項能否依買方同意價進待揀，以及要保存的當次資料。</td><td>原受理結果、待揀單價、歷史供應內容與庫存加減。揀貨不重新套現價。</td></tr>
+      <tr><td>停止販售</td><td>商品販售限制新要求。</td><td>新送單不可售；既有保留與處理紀錄仍存在。</td><td>舊內容查詢、門市供應確認與解除保留，不必先重新上架。</td></tr>
+      <tr><td>補貨／盤點校正</td><td>庫存區分補貨、帳面差異與解除保留。</td><td>新的帳面可用量與受控調整；具體作業仍待定。</td><td>已固定價格、先前排除原因。補貨不讓同次重試重新排隊。</td></tr>
+      <tr><td>同商品必須備齊</td><td>接單與門市確認遵守全量或零供應；不足理由與原要求留下。</td><td>庫存只按受保護的數量保留或解除，不自行選縮量政策。</td><td>認證、HTTP 傳輸、商品介紹；不為一種已選政策造通用 engine。</td></tr>
+      <tr><td>回應遺失後重試</td><td>接單保存穩定身分與初次受理答案；查詢可讀後續進度。</td><td>已受理就回到同一份要求，不重建、不重新保留。</td><td>現在價格、補貨、停售與揀貨進度不改寫第一次判斷。</td></tr>
+      <tr><td>門市回報備不齊</td><td>揀貨／供應確認理解現場結果，保留原要求與失敗原因。</td><td>解除該項尚有效保留；差異校正與再次可售依另定規則。</td><td>買方取消權、送單固定價；不把正常缺貨當整個系統失敗。</td></tr>
+      <tr><td>門市整筆取消</td><td>接單流程確認權限與可取消階段，協調尚有效的保留。</td><td>庫存只解除這次要求仍持有的數量，不讓任意 caller 多還。</td><td>當前售價、可售清單；不因此提供買方取消窗口。</td></tr>
+      <tr><td>買方停用條件</td><td>買方資格能力與接單共同定義哪些處理階段算 Active Order。</td><td>新送單與停用遵守同一守門方式。</td><td>商品定價與庫存算式；不能為無環依賴圖刪掉真業務限制。</td></tr>
+      <tr><td>之後加入推播／簡訊</td><td>流程保存已提交進度，通知負責投遞。</td><td>哪個事實已發生，不必理解鎖序；第一版至少能查到結果。</td><td>不把寄送等待塞進 DB 交易，目前不預選通知管道或可靠投遞框架。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper">
+    <header><span class="badge keep">判斷方法</span><h3>一次操作內一起保存；人工等待前後分開保存</h3></header>
+    <p>送單受理結果、固定價格與帳面保留不能各自成功一半。後續門市回報時，供應結果與必要保留變動也要一起保存。但它們之間隔著人工揀貨，不能塞進同一個長交易。</p>
+    <p>現在商品如何展示、原始要求保存什麼、門市如何確認、庫存如何安全計量，改變的原因不同，不應永遠共用會變動的 Product DTO。這是目前用例下的責任假說，新增真用例時再檢驗，不先替所有未來功能造框架。</p>
+  </article>
+</section>
+
+<section id="responsibilities">
+  <div class="section-head"><h2>責任候選，不是一個能力就拆一個服務</h2><p class="sub">module 有 interface 與 implementation。interface 包含 caller 必須知道的規則、等待、錯誤與交易條件，不只是 Java 方法。本輪增加人工流程，但尚未批准新的 package、資料表或部署。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>候選責任</th><th>擁有的知識</th><th>對外有用的 interface</th><th>不應帶進來的東西</th></tr></thead>
+    <tbody>
+      <tr><td><strong>接單與處理進度</strong></td><td>原始購買要求、送單身分／去重、受理結果、固定價／名稱、進度查詢及門市取消的協調。</td><td>送出一次要求、查原受理結果與目前進度；受授權的門市依流程整筆取消。</td><td>讓買方任意改狀態、操作正反向庫存方法；把收到要求宣稱成供應保證。</td></tr>
+      <tr><td><strong>揀貨／供應確認</strong></td><td>門市待辦、實際備齊與否、全量或零供應、缺貨原因，以及與取消的互斥。</td><td>查看待辦並回報供應結果，不要求操作人員知道 DB 計量細節。</td><td>重算現價、自動縮量、默加付款配送流程；目前不先定認領或逐件掃描制度。</td></tr>
+      <tr><td><strong>商品販售</strong></td><td>目前名稱、權威價格、是否接受新要求及一致版本。</td><td>查現在販售資訊，參與送單當下可售／價格核對。</td><td>改寫舊單價格、支配既有保留的存在性或揀貨結束。</td></tr>
+      <tr><td><strong>庫存</strong></td><td>帳面可用量、有效保留、條件更新、解除保留、鎖序與不變量。</td><td>安全保留完整要求量、解除已證明持有的數量；正常不足回可判斷結果。</td><td>把帳面量當現場保證，或把解除保留當補貨／盤點修正。再次可售與差異處理要依未來選定規則。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper">
+    <header><span class="badge later">責任先清楚，組織方式之後定</span><h3>揀貨可以先在接單 module 內；買方資格也不必膨脹成會員系統</h3></header>
+    <p>第一版需要簡單買方資料、送單資格與停用限制。可先作本地支援能力；停用要問接單進度，新送單也要受資格限制，可由中立 use case 組合，避免兩邊互碰 Repository。</p>
+    <p>接單、揀貨與庫存可以在同一個較大 module 內分工。若拆開後 caller 仍得學完整流程與每個數量細節，先留在 implementation 也合理。不強制一個能力一個 interface、一個 package 或一個服務。</p>
+    <p>送單受理紀錄、目前進度與供應結果有不同用途，不代表每種都要新建一張表或一個微服務。下一輪先決定資料含義與狀態，再決定實體模型。</p>
+  </article>
+</section>
+
+<section id="submission">
+  <div class="section-head"><h2>送單固定價，揀貨確認供應</h2><p class="sub">先保留買方原始要求，再記送單時的判斷與後續供應結果。不能把缺貨商品刪掉，只剩最後商品卻無法解釋原本買了什麼。</p></div>
+  <article class="paper">
+    <header><span class="badge keep">第一版流程</span><h3>先跑通人工處理，不一次設計完整營運</h3></header>
+    <ol class="sequence">
+      <li><div><h4>買方送出要求</h4><p>事前說明不足整項不供應、送單後不能自行改單或取消。後端驗格式、認證與授權，依穩定身分辨認同一次購買。</p></div></li>
+      <li><div><h4>核價並保留帳面數量</h4><p>核對買方資格、可售與確認價。通過且帳面足量的商品保存送單名稱／單價，保留完整要求量；異價、不可售或不足的商品留下逐項原因，不進待揀。受理紀錄、去重與保留同一次短交易提交。</p></div></li>
+      <li><div><h4>門市實際揀貨</h4><p>已受理要求是可持久保存的待辦。等待人員處理時不開著 DB 交易、不持有資料列鎖；第一版不自動到期，需能人工處理或整筆取消。</p></div></li>
+      <li><div><h4>回報供應結果</h4><p>每個商品必須備齊要求量才供應；不足整項不供應，解除該項尚有效保留。其他商品獨立，單價沿用送單價。結果與必要保留變動用另一個短交易保存；回報粒度與確認後庫存生命週期尚待定。</p></div></li>
+      <li><div><h4>買方查目前結果</h4><p>看得出還在等，或門市已完成哪些確認，也能看到未供應原因。第一版不預選推播或簡訊；查詢能力不能只停在初次送單回應。</p></div></li>
+    </ol>
+    <pre><code>例：買方送出牛奶 5 瓶、雞蛋 2 盒
+送單時：
+  牛奶每瓶 80 元，價格相符、帳面足量 → 固定 80 元，保留 5 瓶
+  雞蛋價格相符、帳面足量 → 固定當次價格，保留 2 盒
+  保存受理結果；此時尚未保證能供應
+
+等待期間牛奶漲到 85 元，不改這次的 80 元
+門市實際確認：
+  牛奶只有 4 瓶 → 整項不供應，不改成 4 瓶，解除該項保留
+  雞蛋備齊 2 盒 → 確認供應 2 盒，沿用送單價
+  原始要求仍保留；牛奶帳面差異與再次可售另依規則處理</code></pre>
+  </article>
+  <div class="table-wrap"><table>
+    <thead><tr><th>紀錄／情況</th><th>需要保存什麼</th><th>同次重試與查詢</th></tr></thead>
+    <tbody>
+      <tr><td>原始購買要求</td><td>買方要求的商品、數量、同意價與可辨認本次意圖的內容。</td><td>不能因未進待揀、缺貨或門市取消而改寫。</td></tr>
+      <tr><td>初次送單受理結果</td><td>哪些項目進待揀、固定名稱／單價與保留量，哪些被排除及原因。全部被排除也保存結果，不建立假的待揀工作。</td><td>重試不重新判斷；補貨或改價後想再買，使用新身分。</td></tr>
+      <tr><td>目前處理進度</td><td>仍待處理、已回報結果、門市整筆取消等可查資訊；具體狀態與模型仍待定。</td><td>隨後續作業更新；不能用固定的初次回應代替目前進度。</td></tr>
+      <tr><td>供應確認結果</td><td>每項全量或零供應與原因，全部無法供應也留下紀錄。使用已固定價格，不回查現價。</td><td>同次重試不再排隊、不復活已排除商品、不重建保留。</td></tr>
+      <tr><td>門市整筆取消</td><td>依將來選定的可取消階段，保存取消結果並解除尚有效保留；實體回架不是 DB 自動完成。</td><td>原受理結果保留，目前進度反映取消，不因重播又恢復。</td></tr>
+      <tr><td>某次操作技術失敗</td><td>該次尚未提交的結果與庫存變動一起 rollback；前一個已提交階段仍存在。</td><td>提交結果不明先以穩定身分確認，不能盲目釋放或重新保留。</td></tr>
+    </tbody>
+  </table></div>
+  <p>原來稱作「收據」的固定答案，現在只適合指初次受理紀錄，不是發票，也不是最後供應保證。POST 重播要回歷史答案或附目前進度、查詢如何呈現，仍待 HTTP 契約決定；不變的是同次送單不能重做一次。</p>
+  <div class="notice"><p><b>正常不足與技術失敗分開：</b>現有 applyStockDelta 不足就拋例外、整筆 rollback，不能只加 catch 假裝支援逐項結果。正常異價／不足應是可繼續判斷的結果；JPA constraint、連線、commit 失敗則是當次整體技術失敗，交易可能已 rollback-only。</p></div>
+</section>
+
+<section id="architecture">
+  <div class="section-head"><h2>人工流程跨時間，不必因此分散部署</h2><p class="sub">以下是新產品的候選，先以單一後端 app＋Oracle 推導，不要求現有作業改架構，也不預先決定新 repo 必須用哪個 DB。共同提交以一次系統操作為範圍，不能開長交易等人工揀貨。</p></div>
+  <div class="two-up">
+    <figure>
+      <div class="figure-head"><span class="badge change">現況定位</span><h3>原程式先改庫存，再存 Order</h3></div>
+      <div class="diagram-scroll"><svg class="arch" viewBox="0 0 460 520" role="img" aria-label="基準程式的OrderService經loopback HTTP先提交Product庫存，再另外提交Order，尚未涵蓋新的人工揀貨、逐項結果及送單去重。">
+        <defs><marker id="old-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arrowhead" d="M0,0 L8,4 L0,8 z"/></marker></defs>
+        <rect class="box" x="55" y="18" width="350" height="50" rx="5"/><text class="label" x="230" y="48" text-anchor="middle">外部送單 → OrderController</text>
+        <line class="arrow" x1="230" y1="68" x2="230" y2="103" marker-end="url(#old-arrow)"/><text class="small" x="245" y="91">Java 呼叫</text>
+        <rect class="box" x="55" y="105" width="350" height="70" rx="5"/><text class="label" x="230" y="134" text-anchor="middle">OrderService</text><text class="small" x="230" y="157" text-anchor="middle">尚無人工揀貨／逐項結果／送單去重</text>
+        <line class="arrow network" x1="230" y1="175" x2="230" y2="220" marker-end="url(#old-arrow)"/><text class="warnlabel" x="245" y="201">loopback HTTP</text>
+        <rect class="cross" x="40" y="222" width="380" height="95" rx="5"/><text class="label" x="230" y="250" text-anchor="middle">Product：名稱、價格、可售、庫存混合</text><text class="small" x="230" y="276" text-anchor="middle">通過同 app filter chain，庫存先提交</text><text class="warnlabel" x="230" y="301" text-anchor="middle">commit A</text>
+        <line class="arrow" x1="230" y1="317" x2="230" y2="362" marker-end="url(#old-arrow)"/><text class="small" x="245" y="343">回來再存訂單</text>
+        <rect class="box" x="55" y="364" width="350" height="68" rx="5"/><text class="label" x="230" y="391" text-anchor="middle">Order／Lines（只有商品 ID、數量）</text><text class="warnlabel" x="230" y="416" text-anchor="middle">commit B</text>
+        <text class="small" x="230" y="470" text-anchor="middle">舊單仍查現價；下架過濾也影響歸還</text><text class="warnlabel" x="230" y="496" text-anchor="middle">只換 Java 呼叫，還沒得到新的業務流程</text>
+      </svg></div>
+      <figcaption>既有作業保留，左圖用來學傳輸、補償與交易差異，不是待拆除清單。右圖是另案新產品候選，多次提交源自人工流程跨時間；兩者服務不同學習目標。</figcaption>
+    </figure>
+    <figure>
+      <div class="figure-head"><span class="badge keep">本地基準候選</span><h3>每個操作短交易，中間等待人工</h3></div>
+      <div class="diagram-scroll"><svg class="arch" viewBox="0 0 460 550" role="img" aria-label="候選流程：第一次短交易保存送單受理、固定價格、帳面保留及去重，提交後由門市實際揀貨，等待期間不持有DB交易或鎖；後續門市回報以另一個短交易保存供應結果與必要保留變動。單一app與Oracle即可。">
+        <defs><marker id="new-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="arrowhead" d="M0,0 L8,4 L0,8 z"/></marker></defs>
+        <text class="small" x="230" y="18" text-anchor="middle">送單入口：認證／驗證／有限在途量</text>
+        <rect class="tx" x="15" y="32" width="430" height="170" rx="6"/><text class="txlabel" x="230" y="58" text-anchor="middle">短交易 1：送單</text>
+        <rect class="box" x="40" y="74" width="380" height="45" rx="5"/><text class="label" x="230" y="102" text-anchor="middle">辨認同次意圖；核對資格、可售與確認價</text>
+        <line class="arrow" x1="230" y1="119" x2="230" y2="140" marker-end="url(#new-arrow)"/><text class="small" x="246" y="135">保存</text>
+        <rect class="focus" x="40" y="143" width="380" height="40" rx="5"/><text class="label" x="230" y="168" text-anchor="middle">原始要求＋受理結果＋固定價＋保留量</text>
+        <text class="txlabel" x="230" y="195" text-anchor="middle">一起 commit；尚未保證供應</text>
+        <line class="arrow" x1="230" y1="202" x2="230" y2="272" marker-end="url(#new-arrow)"/>
+        <rect class="box" x="58" y="215" width="344" height="45" rx="4"/><text class="label" x="230" y="233" text-anchor="middle">門市實際揀貨</text><text class="small" x="230" y="251" text-anchor="middle">等待期間不持有 DB 交易／鎖</text>
+        <rect class="tx" x="15" y="276" width="430" height="174" rx="6"/><text class="txlabel" x="230" y="302" text-anchor="middle">短交易 2：門市回報</text>
+        <rect class="box" x="40" y="316" width="380" height="48" rx="5"/><text class="label" x="230" y="345" text-anchor="middle">備齊才供應；不足整項不供應、不縮量</text>
+        <line class="arrow" x1="230" y1="364" x2="230" y2="384" marker-end="url(#new-arrow)"/>
+        <rect class="focus" x="40" y="387" width="380" height="40" rx="5"/><text class="label" x="230" y="412" text-anchor="middle">供應結果＋必要保留變動</text>
+        <text class="txlabel" x="230" y="442" text-anchor="middle">另一個 commit；不重算現價</text>
+        <text class="small" x="230" y="481" text-anchor="middle">門市整筆取消：也用自己的短交易</text><text class="small" x="230" y="505" text-anchor="middle">同一 app／Oracle 即可；不必先加 MQ</text><text class="small" x="230" y="529" text-anchor="middle">圖只畫保存點，尚未決定狀態與資料表</text>
+      </svg></div>
+      <figcaption>每個虛線框是一個操作的提交範圍，不包住人工等待。門市回報可能有不同操作粒度，仍待定；人員已拿出的商品也不能靠 DB rollback 自動回到貨架。</figcaption>
+    </figure>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>決策層</th><th>目前建議</th><th>仍需驗證的代價</th></tr></thead>
+    <tbody>
+      <tr><td>業務責任／module</td><td>先分清接單進度、揀貨確認、商品販售、庫存與買方資格；可以在同一較大 module 內分工。</td><td>interface 要讓 caller 少懂 implementation，不是一個能力一個 Service／Impl。</td></tr>
+      <tr><td>交易</td><td>送單的要求／受理／固定價／保留／去重同提交；後續回報或門市取消，各自保存結果與必要庫存變動。</td><td>同一 DataSource／transaction manager、一致鎖序、正常結果與技術故障、JPA bulk update／快取都要驗。絕不跨人工等待持鎖。</td></tr>
+      <tr><td>部署與待辦</td><td>新產品先以單一後端＋關聯式 DB 作候選，用持久紀錄保存待辦；人工操作不必由訊息 worker 驅動。</td><td>app 重啟後待辦仍可見。前端／後端／E2E 同 repo 是版本管理方式，不等於同程序或必須一起部署；若將來跨服務，恢復另設計。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper">
+    <header><span class="badge later">可選舊實驗，尚非新流程 spec</span><h3>人工跨步驟，不等於跨服務取消</h3></header>
+    <p>地圖保留 Reservation 身分、持久化取消工作、lease 與重啟接續的<a href="deep-module-map.html#reliable-cancel">跨交易練習</a>。這是刻意拿掉某次操作內共同 commit 的額外實驗，本地版不需要為同庫人工取消先建立 worker。</p>
+    <p>舊取消切片沒有完整涵蓋送單去重、人工供應確認、逐項解除保留或 create UNKNOWN。只用整筆 HELD → CANCELLED 也不能宣稱已支援新流程；門市取消權限、已揀商品與 Active Order 關係都要重看。</p>
+    <p>若將來兩條都做，先固定相同業務承諾與操作完成點，再比較故障恢復與效能。不拿功能較少的取消實驗與完整人工流程直接比 TPS 或 class 數。</p>
+  </article>
+</section>
+
+<section id="concurrency">
+  <div class="section-head"><h2>帳面保留、實體商品與併發，各自守住什麼</h2><p class="sub">買方不改單／取消，確實減少分支；送單去重、門市重複回報、取消競爭與庫存差異仍是需要處理的真實問題。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>要守住的事</th><th>建議守門</th><th>不能當成保證的做法</th></tr></thead>
+    <tbody>
+      <tr><td>同次送單不重複保留</td><td>具範圍的唯一身分與交易協調，受理結果與保留同存；重試不重算第一次判斷。</td><td>相同 payload 猜重複、記憶體 Set、先記做過再另存要求；constraint 失敗後仍在原失敗交易繼續。</td></tr>
+      <tr><td>送單價格固定</td><td>送單短交易內以一致鎖／版本保護可售與價格核對，保存本次名稱／單價；後續只用已保存單價。</td><td>交易外看過價就當保證、信任前端任意價、揀貨時才回查現價。保護的是短交易，不是鎖住商品直到揀貨結束。</td></tr>
+      <tr><td>帳面數量不重複分配</td><td>條件更新、非負約束、保留歸屬驗證；多商品 writer 用一致順序，帳面不足回正常結果。</td><td>先查夠再無條件寫、單程序鎖，或宣稱 DB 沒超額保留就證明現場一定有貨。</td></tr>
+      <tr><td>供應確認只做一次</td><td>保護同份處理紀錄與逐項結果，回報與必要保留變動同提交；只接受符合流程與授權的操作。</td><td>重複點按就多解除一次、任意填供應量繞過全量規則、直接讓 caller 改 status。具體操作粒度尚待定。</td></tr>
+      <tr><td>門市確認與整筆取消競爭</td><td>依可取消階段，用鎖或經驗證的 CAS 排定結果；只解除當下仍有效的保留。</td><td>各自先釋放再比版本，或確認覆蓋取消後又復活。買方無取消權也不能消除門市之間的競爭。</td></tr>
+      <tr><td>買方停用與新要求</td><td>先補 Active Order 對新階段的定義；送單與停用遵守相同買方列守門。</td><td>只在 READ COMMITTED 內查 exists、只靠 FK、期待建單自動推進 Account.version；把所有歷史紀錄都算活躍。</td></tr>
+      <tr><td>等待有界</td><td>HTTP 在途、連線與鎖等待有上限；人工待辦持久化。技術暫時失敗必要時重試該次完整短交易。</td><td>Virtual Threads 等於無限容量、開交易等人、只重試某條 SQL、HTTP timeout 就釋放已提交保留。</td></tr>
+    </tbody>
+  </table></div>
+  <article class="paper">
+    <header><span class="badge change">原公式不再適用</span><h3>解除保留不等於補貨，Order 存在也不等於仍持有原數量</h3></header>
+    <p>一份要求可能有商品送單就被排除、待揀後才不供應，或因門市取消而解除保留；原始行仍需留下。因此不能再用「所有尚未 Cancel 的 Order Lines 數量」直接當 reserved。</p>
+    <pre><code>需要對帳的是：
+  庫存保留總量 = 各購買要求目前仍有效的保留量總和
+
+不再可直接套用：
+  reserved = 所有尚未取消 Order Lines 的原始要求量總和
+
+解除某項保留 ≠ 增加現場實際存量
+帳面保留成功 ≠ 門市已備齊
+原始購買要求 ≠ 最後供應內容
+原受理結果 ≠ 目前處理進度</code></pre>
+    <p>例：保留牛奶 5 瓶，門市發現只有 4 瓶，整項不供應。除了解除該項保留，還有帳面差異與可能已拿出商品的處理；不能只加回可售量就宣稱已對帳。具體校正、回架與再次可售規則仍待定，實作這條路徑前要補齊。</p>
+    <p>有效保留可以先由接單資料表達，不必先複製一套 Reservation Lines；若獨立庫存所有權或稽核真的需要 ledger 再評估。供應確認後保留如何結束也尚未定，本頁不假造完整庫存生命週期。</p>
+  </article>
+  <article class="paper">
+    <header><span class="badge change">新產品與既有作業規則不同</span><h3>停止新銷售，既有要求仍能處理</h3></header>
+    <p>現有 Product 的 DELETED／SQLRestriction 同時影響查詢與庫存更新。只刪掉 reserved 大於零的下架檢查，release 仍可能更新零列；新需求必須拆開「能否接新要求」與「既有保留是否仍可操作」。不能全面拿掉過濾讓所有 caller 隨意存取。</p>
+    <p>歷史與待揀價格讀送單快照，不回查目前可售商品。這也解除改價改寫舊總額、下架缺商品造成 NPE 的根本依賴。取消、缺貨與已終止紀錄如何對授權 caller 可見，需在新契約明訂。</p>
+    <p>新產品不預設移入既有作業資料。若日後真的要匯入，未知歷史價格不能用現價假造，舊 reserved 也需另行核對；共同交易不會修好舊帳。現在沒有資料搬遷、清庫或執行 migration 的授權。</p>
+  </article>
+  <article class="paper">
+    <header><span class="badge keep">本地版仍要做對</span><h3>Spring 交易接線與 JPA 快取</h3></header>
+    <ul>
+      <li>每次系統操作由 Spring proxy 能攔截的 use-case 方法啟動 DB-only 短交易，內部以 REQUIRED 參與；REQUIRES_NEW 會拆成部分提交，自呼叫可能繞過代理。</li>
+      <li>save／flush 不等於最終 commit。成功回應等提交完成；commit 結果不明時先查同次操作紀錄，不盲目反向操作庫存。</li>
+      <li>批次 UPDATE 不自動執行 auditing listener 或更新 managed entity；明確維護時間／版本，避免後來 flush 舊值蓋掉庫存。</li>
+      <li>先定送單身分、買方、處理紀錄與商品／庫存的共同鎖序。送單、門市回報、整筆取消與管理 writer 都須遵守；悲觀等待與樂觀衝突都要量。</li>
+      <li>HTTP、寄信與人工揀貨都不放進持鎖交易。已拿出的商品不能靠 rollback 回架，實體作業與資料提交要分清楚。</li>
+    </ul>
+  </article>
+</section>
+
+<section id="capacity">
+  <div class="section-head"><h2>能收多少要求，與能完成多少供應，分開量</h2><p class="sub">接單很快但待辦一直堆積，不代表整個服務有同等供應能力。第一版沒有自動到期，更要看見待辦數、等待時間與占住的保留量。</p></div>
+  <article class="paper">
+    <header><span class="badge keep">已確認方向</span><h3>固定環境，一般流量與熱門商品競爭分開測</h3></header>
+    <ul>
+      <li>記錄 app／DB／壓測端資源、版本、instance 數、資料量與索引，說清楚壓測端是否已成瓶頸。用有限、可重複資料起跑。</li>
+      <li>一般情境包含瀏覽、送單、查受理／目前進度，以及門市回報與取消；比例之後再定，不加入不存在的買方取消流量。</li>
+      <li>熱門商品驗帳面保留競爭，不是公平秒殺隊列。補貨、回報不供應、取消或每輪重置須明確；不測到後半段全不足還混稱接單容量。</li>
+      <li>逐段增加到達流量，量吞吐、p95／p99、拒絕、技術錯誤及 DB 連線／鎖等待；過載後再降載驗恢復。</li>
+      <li>若用自動腳本模擬門市回報，清楚標示是系統測試，不當成人員真實揀貨速度或現場備貨能力。</li>
+    </ul>
+  </article>
+  <div class="table-wrap"><table>
+    <thead><tr><th>分開計數</th><th>要避免的誤讀</th></tr></thead>
+    <tbody>
+      <tr><td>HTTP 到達、受理、過載拒絕、在途量</td><td>未受理不是缺貨；timeout 不證明沒有保存，也不能釋放已提交保留。</td></tr>
+      <tr><td>新要求、進待揀／被排除商品、保留件數</td><td>初次受理不是最終供應；全部被排除的快速結果不能灌成大量成功備貨。</td></tr>
+      <tr><td>同次重播與新受理</td><td>大量重播很快，不代表能以相同速率接受新要求；核對沒有多筆要求或重複保留。</td></tr>
+      <tr><td>待辦數、最久／分布等待時間、保留量</td><td>HTTP 回應再快，仍可能把人工流程壓垮。業務待辦上限與超限行為要另定。</td></tr>
+      <tr><td>供應確認量、未供應量、門市整筆取消</td><td>不要混進送單吞吐；帳面不足與現場找不到也應分辨。</td></tr>
+      <tr><td>各操作延遲與正確性</td><td>不以大量讀取稀釋送單／回報尾端延遲；有效保留、非負計數與解除只一次，逐階段核對。</td></tr>
+    </tbody>
+  </table></div>
+  <p class="source">目前沒有可宣稱的容量數字。Virtual Threads 讓等待執行緒便宜，Hikari、熱門資料列與門市人力仍有限；任何改善都要用明確負載與正確性基準證明。</p>
+</section>
+
+<section id="choices">
+  <div class="section-head"><h2>新產品可以不同，既有作業不必跟著重寫</h2><p class="sub">既有實作與上下游 CI 保留學習價值。下表談新產品可借用的經驗與不同選擇，不是要把現 repo 的 loopback、容錯或測試鏈路拆掉。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>機制</th><th>建議</th><th>原因與條件</th></tr></thead>
+    <tbody>
+      <tr><td>MVC／Validation、RFC 9457／ErrorCode</td><td><span class="badge keep">保留基礎</span></td><td>外部 HTTP 仍需驗證、穩定錯誤碼與遮蔽；正常未進待揀或不供應，用逐項結果表達，不一律丟整體例外。</td></tr>
+      <tr><td>PageResponse／CreatedResponse／DTO</td><td><span class="badge change">重訂送單與進度契約</span></td><td>有名字的回應、分頁與 Location 原則有用；只有 id 不足以說明受理與供應差異，其他建立端點不必一併改。</td></tr>
+      <tr><td>JPA／Oracle／Flyway、Clock／audit</td><td><span class="badge keep">可沿用</span></td><td>真 DB、約束與可追溯 schema 有用。不要求換 ORM，也不能改已套用 migration 來逃避資料演化。</td></tr>
+      <tr><td>loopback Client／HTTP 池／內部 DTO</td><td><span class="badge keep">既有保留，新案按需</span></td><td>目前作業保留 HTTP 呼叫與教材價值。新產品同程序可以直接呼叫業務方法，不必先複製自呼叫、傳輸 DTO 與補償；不是來源 SpringBoot 的刪除工作。</td></tr>
+      <tr><td>嚴格遠端錯誤翻譯／HTTP 測試</td><td><span class="badge later">有真遠端時用</span></td><td>本地不必先序列化再解析例外；獨立教材或外部依賴仍需明確 timeout、分類與冪等。</td></tr>
+      <tr><td>去重與持久進度</td><td><span class="badge keep">本版必要</span></td><td>固定初次受理答案，也能讀後續進度。全部未進待揀、全部不供應與取消都保留紀錄，scope／期限／wire 仍需定。</td></tr>
+      <tr><td>門市待辦</td><td><span class="badge keep">先做人工流程</span></td><td>保存待辦、供應回報與門市整筆取消；不先加複雜認領、掃描、通知或配送。這些不是一個長 DB 交易。</td></tr>
+      <tr><td>反向補償／取消 worker／MQ</td><td><span class="badge later">新案不先複製</span></td><td>既有補償留作學習；新產品同庫的一次操作可共同提交，人工等待用持久進度。跨服務恢復可另做實驗，不因多階段就必須上 MQ。</td></tr>
+      <tr><td>自動到期 worker</td><td><span class="badge later">延後</span></td><td>先人工處理與取消；未處理持續占量的代價要可見，未來有需求再定期限與競爭規則。</td></tr>
+      <tr><td>Resilience4j、Virtual Threads 與 DB 池</td><td><span class="badge later">新案依量測選用</span></td><td>現作業的容錯配置保留；新產品依真遠端與有限資源選保護，不照搬每個 Service 的 breaker。現額度是 per-process 方法群，不是全叢集／每買方配額。</td></tr>
+      <tr><td>狀態、軟刪與可售過濾</td><td><span class="badge change">新案另定生命週期</span></td><td>待揀與供應確認不能只靠 DELETED 表達；新產品按自己的流程定狀態與可見性，不機械複製舊 status，也不因此改寫既有作業 ADR。</td></tr>
+      <tr><td>安全</td><td><span class="badge keep">買方與門市操作分開</span></td><td>買方無自行取消權要在後端落實，門市操作另授權。Basic＋noop 是機器帳號 demo，非人類登入方案；Alloy 仍可能用 internal scraper 憑證。</td></tr>
+      <tr><td>觀測與本機堆疊</td><td><span class="badge keep">訊號與後端分開選</span></td><td>保留 health、log、必要 metrics，加入受理／保留／待辦／供應的分別計數；本機 Alloy／Prometheus／Tempo／Grafana 可選擇性跑。</td></tr>
+      <tr><td>既有上下游 CI</td><td><span class="badge keep">原樣保留定位</span></td><td>來源 SpringBoot 與獨立 Playwright repo 的測試／映像／下游驗證鏈路，是完整作業的一部分。新產品需求不觸發它們的淘汰或搬遷。</td></tr>
+      <tr><td>新案前端與 Playwright E2E</td><td><span class="badge later">同 repo，分階段加入</span></td><td>第一階段只有可執行後端；稍後只取Playwright骨架、不搬舊案例，前端等實際需求再選框架與加入。新畫面／E2E與後端同版演進，但完整E2E、監控容器與前端不作開工前置。詳見<a href="project-bootstrap-plan.html#phases">工程階段</a>。</td></tr>
+      <tr><td>測試與架構驗證經驗</td><td><span class="badge keep">新案參考，不搬整套</span></td><td>真 DB 驗鎖與提交、wire 驗契約、Playwright 驗完整操作。若有前端，還要驗真實畫面流程，不只 REST 測試。ArchUnit／Spring Modulith 有需要再加。</td></tr>
+    </tbody>
+  </table></div>
+  <div class="two-up">
+    <article class="paper"><header><span class="badge keep">維運</span><h3>先問要看出什麼問題</h3></header><p>延續<a href="../../../SpringBoot/docs/monitoring-needs-first.md">從需求反推監控</a>：慢在送單還是回報、拒絕因過載還是帳面不足、門市待辦是否堆積、哪些保留一直未結束。不要只因有 metric 就放 panel。</p><p>本機教學堆疊與 app 匯出層分開；正式公開仍需 TLS、secret、管理權限與告警。本文不是完成正式部署的保證。</p></article>
+    <article class="paper"><header><span class="badge later">授權</span><h3>不能只靠 body 的買方 ID 或畫面按鈕</h3></header><p>現有 API Credential 與業務 Account 不同；caller 不能只帶 accountId 就查別人的要求，也不能自稱門市就回報供應或取消。</p><p>不必本輪加登入系統，但下一份契約要定義代表誰送單、查詢與門市作業的權限。可參考<a href="../../../SpringBoot/docs/security-external-idp-migration.md">外部 IdP 遷移說明</a>，單體／分散式不會自動解決。</p></article>
+  </div>
+</section>
+
+<section id="practice">
+  <div class="section-head"><h2>先有可執行後端，再長出新產品流程</h2><p class="sub">工程起點見<a href="project-bootstrap-plan.html">分階段起跑手冊</a>：沿用既有後端建置／測試，不必重做技術基礎，也不用先有Playwright、監控容器或前端。下列是後續業務依賴順序，不是第一個里程碑一次全做。</p></div>
+  <article class="paper">
+    <header><span class="badge keep">建議依賴順序</span><h3>可信受理 → 人工確認 → 庫存收尾 → 容量 → 額外實驗</h3></header>
+    <ol class="sequence">
+      <li><div><h4>在已確認的pxgo-clone先交後端基礎</h4><p>依工程起跑清單分階段，不重問是否開repo。進入第一段送單用例前再定身分、授權與HTTP形狀；進入門市確認前補回報、取消、差異與Active Order規則。不預設搬舊資料，也不一次實作完整產品。</p></div></li>
+      <li><div><h4>建立可信的送單與保留</h4><p>原始要求、逐項受理結果、送單價格／名稱、有效保留與去重一起設計。帳面不足整項排除；參考舊經驗，但不整套複製，也不沿用現價讀歷史內容的模型。</p></div></li>
+      <li><div><h4>跑通最小人工流程</h4><p>待辦重啟仍可見；人員回報全量供應或整項不供應，買方查得到進度；門市依權限整筆取消。沒有買方自行取消窗口，也不先加自動到期。</p></div></li>
+      <li><div><h4>驗庫存與競態</h4><p>缺貨／取消只解除有效保留一次，停售後仍能處理；固定價、回報／取消競爭、停用競爭與當次技術失敗 rollback。盤點、回架、確認後保留的規則先定再驗。</p></div></li>
+      <li><div><h4>建立容量基準，再選額外實驗</h4><p>有限庫存、一般／熱點、受控過載與降載恢復；送單能力和供應完成分開量。想學 HTTP 故障或跨服務取消再另做，不是所有內部 module 的必選架構。</p></div></li>
+    </ol>
+    <p>流程之後可以改，不代表現在就做兩套 runtime flags，讓同 schema 混跑互斥 writer。先保存原始事實與清楚的資料演化方式，讓修改有依據；不拿一條取消成功宣稱整個流程已可靠。</p>
+  </article>
+  <p>既有程式的學習分析與另案設計參考，放在<a href="deep-module-map.html#next">Module 地圖的交接</a>。那是經驗與差異對照，不是要求來源 SpringBoot 或下游依表遷移。</p>
+</section>
+
+<section id="references">
+  <div class="section-head"><h2>既有作業的學習依據，與新產品的差異</h2><p class="sub">以下沿用來源SpringBoot 6f6218c的程式核對，說明可參考經驗與模型差異，不是pxgo-clone已實作內容。來源正式文件維持原案效力；新產品在自己的repo記錄spec／語言／ADR，不回頭覆寫來源規範。</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>現況</th><th>定位／新需求落差</th></tr></thead>
+    <tbody>
+      <tr><td>建立請求沒有確認價／送單身分</td><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/order/DTO/CreateOrderRequest.java">CreateOrderRequest</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/order/DTO/CreateOrderLineRequest.java">CreateOrderLineRequest</a>只有買方、商品、數量。需表達原要求、確認價與一次意圖，不只多加一個欄位。</td></tr>
+      <tr><td>成功只有 id，沒有人工處理進度</td><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/order/OrderController.java#L44">OrderController:44–55</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/util/CreatedResponse.java">CreatedResponse</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/order/OrderTransactionalService.java#L38">OrderTransactionalService:38–62</a>不足以區分受理、待揀與最終供應。Order 建立時機與新操作契約另定。</td></tr>
+      <tr><td>沒有送單名稱／單價快照</td><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/order/OrderLine.java#L60">OrderLine:60–64</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/order/OrderService.java#L102">OrderService 讀取</a>仍用當前 Product，缺商品可能 NPE；新流程要固定送單價格，也要保留未供應的原要求。</td></tr>
+      <tr><td>下架與庫存可操作性綁一起</td><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/product/Product.java">Product</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/product/ProductRepository.java#L24">ProductRepository</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/product/ProductService.java#L155">ProductService</a>需讓既有保留在下架後仍可處理，不只刪檢查。</td></tr>
+      <tr><td>多商品不足即例外，庫存先獨立提交</td><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/product/ProductService.java#L211">applyStockDelta</a>與<a href="../../../SpringBoot/src/main/java/com/ibm/demo/order/OrderService.java#L50">OrderService 寫入</a>需分正常逐項結果與當次技術故障；舊買方改單／取消路徑也不能原封保留。</td></tr>
+      <tr><td>停用跨多次交易問有無單</td><td><a href="../../../SpringBoot/src/main/java/com/ibm/demo/orchestration/AccountLifecycleService.java#L60">AccountLifecycleService:60–73</a>先查再改，不等於並發安全。新流程還須補哪些階段算 Active Order。</td></tr>
+      <tr><td>正式詞彙與終止決策屬於既有作業</td><td><a href="../../../SpringBoot/CONTEXT.md">CONTEXT</a>的 Reservation／Delist／更新語意維持現案效力，不因新產品就改寫。<a href="../../../SpringBoot/docs/adr/0001-soft-delete-only-for-termination.md">ADR 0001</a>的歷史保留理由可借鏡；<a href="../../../SpringBoot/docs/adr/0002-termination-recorded-only-by-deleted.md">ADR 0002</a>也保留新增業務狀態的空間。新產品須按自己的流程另定語言、可見性與決策。</td></tr>
+      <tr><td>可以沿用的基礎</td><td><a href="../../../SpringBoot/build.gradle">build.gradle</a>、<a href="../../../SpringBoot/src/main/java/com/ibm/demo/config/RestClientConfig.java">RestClientConfig</a>、<a href="../../../SpringBoot/src/test/java/com/ibm/demo/BaseIntegrationTest.java">BaseIntegrationTest</a>、<a href="../../../SpringBoot/docs/agents/06-architecture.md">現行架構指引</a>、<a href="../../../SpringBoot/docs/agents/08-testing.md">測試規範</a>、<a href="../../../SpringBoot/docs/agents/09-monitoring.md">監控分層</a>。只取需要部分，不順便改依賴／部署。</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<footer class="end">
+  <p><b>狀態：</b>2026-11-26新產品需求草案，非來源作業重寫計畫。pxgo-clone已由使用者建立，本輪只交付文件；先沿用後端，Playwright僅骨架、不帶舊案例，E2E／監控容器／前端分階段。未搬程式、改應用／schema／CI／CONTEXT／ADR，也未安裝、跑應用測試／壓測或commit／push。</p>
+  <p><b>交接：</b>先讀本頁，再看<a href="project-bootstrap-plan.html">工程起跑</a>；需要追既有程式時看<a href="deep-module-map.html">Module 地圖</a>。三份HTML同放docs/new-requirements-handout/，不受Gradle clean影響，請一起保留。程式、來源指引與Playwright骨架不在本資料夾，另依工程手冊的repo／SHA取得。</p>
+  <p><b>閱讀：</b>無外部 JavaScript 或儲存；Google 字型不可用時用系統字型。圖只說明責任與提交方式，不是狀態定案、現場供應保證或已量測效能。本輪只更新本地文件，未發布線上 Artifact。</p>
+</footer>
+</main>

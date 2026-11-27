@@ -1,0 +1,29 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Gradle and Java IDE output (keep gradle/wrapper, including its JAR)
+.gradle/
+**/build/
+/backend/bin/
+
+# H2 local database files (normal data lives outside the repository)
+*.mv.db
+*.mv.db.*
+*.trace.db
+*.lock.db
+*.temp.db
+*.h2.db
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Local Claude worktrees, not project instructions
+.claude/worktrees/
