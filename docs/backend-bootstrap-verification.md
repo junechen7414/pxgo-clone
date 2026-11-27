@@ -82,13 +82,25 @@ Windows 自動化 smoke 只對本次子程序啟用 Boot admin MBean，透過本
 
 上面的零連線／檔案鎖／讀回斷言用來實證這條正常路徑。這不代表崩潰、強制終止、斷電、硬碟寫入保證、備份還原或升級相容性已通過。H2 檔案不是備份，未來有重要資料前仍須設計與驗證備份／復原。
 
+## GitHub Actions 實跑
+
+2026-11-27 已推送骨架 commit [`30bf53048fb5bad08913a74533aaad1c6e14aa95`](https://github.com/junechen7414/pxgo-clone/commit/30bf53048fb5bad08913a74533aaad1c6e14aa95)，由 push 事件觸發 [Backend CI run 45954251478](https://github.com/junechen7414/pxgo-clone/actions/runs/45954251478)，結論為 **success**。已核對 run 的 head SHA，並下載該次上傳的 XML 報告確認，不只依賴綠色圖示。
+
+- Runner：Ubuntu 26.04.1；Temurin Java 25.0.5（本機為 25.0.4）；Gradle Wrapper 9.6.1。
+- 執行 `bash ./gradlew check bootJar --no-daemon --console=plain`：**BUILD SUCCESSFUL in 45s，6 tasks 實際執行**。與本機 7 tasks 的差異是 CI 不額外執行 clean。
+- XML：**1 test、0 failures、0 errors、0 skipped**；完整執行 H2 file DB 的兩次 context、migration／JPA／HTTP health、已提交資料重開與連線／檔案釋放斷言。
+- `Test with embedded H2 and build` 與 `Upload test results` 兩步皆成功，`backend-test-results` artifact 已上傳，含 HTML 與 XML；沒有配置 DB service container 或 Testcontainers。
+- 此 run 驗證的是上述骨架 commit。後續補入本節的 docs-only commit 不在 workflow 的 path filter 內，因此不會因本文件更新再次觸發 Backend CI；不將原 run 冒稱為後續文件 commit 的 CI。
+
+CI 另有非失敗警告：現有四個 v4 actions 以 Node.js 20 為目標，runner 已強制改用 Node.js 24；`actions/setup-java@v4` 另被標示 deprecated，日誌也有 `punycode` deprecation。這次保留已實測的 workflow，不順便更換 actions major version；後續維護時須另行升級並重驗。這些警告與下列 Flyway／H2 版本警告都未使本次測試或打包失敗。
+
 ## 版本警告與未驗項目
 
 - **Flyway 版本警告**：本輪 Flyway 12.11.0 顯示 H2 2.5.252 新於它宣告的已驗證版本 2.3.232。實測 V1 migrate／validate／重開均通過；這不等於 Flyway 已正式驗證整組版本。本輪遵循既定 Boot BOM，沒有為消除警告自行降版或混搭；後續升級或新增 migration 應持續跑實測。
 - 無產品 entity，JPA validate 只驗初始化，不能稱產品 mapping／資料約束驗收。
 - 未實作業務純邏輯／端點，因此沒有業務 unit／HTTP 錯誤契約測試。
 - 未驗 Security／授權、業務交易競態、前端、Playwright、負載、多後端實例、崩潰復原或部署。
-- CI workflow 使用一般 Ubuntu JDK runner 直接執行 `check bootJar`，不配置 DB 容器。目前準備首次推送；**GitHub Actions 仍待實際 run 結果**，不能以本機綠燈代替。
+- 本機與 GitHub Actions 的骨架 build／整合測試皆通過，雲端證據見上節；這不擴大為業務驗收，也不代表 pull request 事件、部署或所有 CI failure 路徑已測過。
 
 ## 交付與本機資料
 
@@ -98,7 +110,7 @@ Windows 自動化 smoke 只對本次子程序啟用 Boot admin MBean，透過本
 
 先前本機 `.env` 與停止的 Oracle 容器／volume 不擅自刪除、不讀取其秘密；它們不是目前後端或 CI 的依賴，也不進版控。後續清理須另行確認。
 
-操作方式見 [backend README](../backend/README.md)。先完成骨架提交／推送與 CI 實測；本次交付不順便開始送單受理與保留實作。
+操作方式見 [backend README](../backend/README.md)。骨架已提交／推送且 CI 實測通過；本次交付不順便開始送單受理與保留實作。
 
 ## 官方依據
 
